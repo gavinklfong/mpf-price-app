@@ -1,4 +1,4 @@
-<mxfile host="www.draw.io" modified="2020-01-27T13:30:11.964Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:72.0) Gecko/20100101 Firefox/72.0" etag="ZKCpoRi5w0Ang-LsJQBl" version="12.5.8" type="gitlab">
+<mxfile host="www.draw.io" modified="2020-01-27T13:31:27.018Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:72.0) Gecko/20100101 Firefox/72.0" etag="c984IphGhumN-0S74ou5" version="12.5.8" type="gitlab">
   <diagram id="pc2qMn5sm3m6l2bE0DKY" name="Page-1">
     <mxGraphModel dx="769" dy="556" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
@@ -202,8 +202,8 @@
         <mxCell id="zXoUHPLwYCqJy2Muw-rh-66" value="Callout" style="strokeWidth=1;shadow=0;dashed=0;align=center;html=1;shape=mxgraph.mockup.text.callout;linkText=;textSize=17;textColor=#666666;callDir=SE;callStyle=line;fontSize=17;fontColor=#666666;align=right;verticalAlign=bottom;strokeColor=#666666;fillColor=#007FFF;" vertex="1" parent="1">
           <mxGeometry x="340.76" y="180" width="129.24" height="40" as="geometry"/>
         </mxCell>
-        <mxCell id="zXoUHPLwYCqJy2Muw-rh-67" value="" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12;align=center;" vertex="1" parent="1">
-          <mxGeometry x="227.5" y="172" width="120" height="20" as="geometry"/>
+        <mxCell id="zXoUHPLwYCqJy2Muw-rh-67" value="" style="rounded=0;whiteSpace=wrap;html=1;fontSize=12;align=center;strokeColor=#7D7D7D;" vertex="1" parent="1">
+          <mxGeometry x="227.5" y="172" width="92.5" height="20" as="geometry"/>
         </mxCell>
         <mxCell id="zXoUHPLwYCqJy2Muw-rh-68" value="Time Period" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;" vertex="1" parent="1">
           <mxGeometry x="150" y="172" width="80" height="20" as="geometry"/>
@@ -213,6 +213,9 @@
         </mxCell>
         <mxCell id="zXoUHPLwYCqJy2Muw-rh-70" value="Interval" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;" vertex="1" parent="1">
           <mxGeometry x="150" y="200" width="80" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="zXoUHPLwYCqJy2Muw-rh-73" value="" style="shape=image;html=1;verticalAlign=top;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;imageAspect=0;aspect=fixed;image=https://cdn4.iconfinder.com/data/icons/evil-icons-user-interface/64/calendar-128.png;fillColor=#007FFF;fontSize=13;fontColor=#FFFFFF;align=center;" vertex="1" parent="1">
+          <mxGeometry x="322" y="168" width="28" height="28" as="geometry"/>
         </mxCell>
       </root>
     </mxGraphModel>
