@@ -18,17 +18,17 @@ import {
     IonSelectOption
   } from '@ionic/react';
   import { book, build, colorFill, grid } from 'ionicons/icons';
-  import React from 'react';
+  import React, { useEffect, useRef } from 'react';
   import Chart from 'chart.js';
 
-class ChartComponent extends React.Component {
+  const ChartComponent: React.FC = () => {
 
-    chartRef:any = React.createRef();
+    const chartRef = useRef<HTMLCanvasElement>(null);
 
-    componentDidMount() {
-        const myChartRef = this.chartRef.current.getContext("2d");
+    useEffect(() => {
+        const chartRenderingCtxRef: CanvasRenderingContext2D = chartRef?.current?.getContext("2d")!;
         
-        new Chart(myChartRef, {
+        new Chart(chartRenderingCtxRef, {
             type: "line",
             data: {
                 //Bring in data
@@ -44,18 +44,17 @@ class ChartComponent extends React.Component {
                 //Customize chart options
             }
         });
-    }
+        
+    }, []);
 
-    render() {
-        return (
-            <div>
-                <canvas
-                    id="myChart"
-                    ref={this.chartRef}
-                />
-            </div>
-        )
-    }
+    return (
+        <div>
+            <canvas
+                id="myChart"
+                ref={chartRef}
+            />
+        </div>
+    );
 };
 
 export default ChartComponent;
