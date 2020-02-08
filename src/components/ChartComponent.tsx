@@ -21,24 +21,39 @@ import {
   import React, { useEffect, useRef } from 'react';
   import Chart from 'chart.js';
 
-  const ChartComponent: React.FC = () => {
+
+  export interface ChartDataPoint {
+      x: string | number;
+      y: string | number;
+  }
+
+  export interface ChartDataset {
+      data: Array<ChartDataPoint>;
+      label: string;
+      borderColor?: string;
+      fill?: boolean;
+  }
+  interface Props {
+    type: string,
+    labels: Array<string>,
+    datasets: Array<ChartDataset>
+  }
+
+
+  const ChartComponent: React.FC<Props> = ( props ) => {
 
     const chartRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
+
         const chartRenderingCtxRef: CanvasRenderingContext2D = chartRef?.current?.getContext("2d")!;
         
         new Chart(chartRenderingCtxRef, {
-            type: "line",
+            type: props.type,
             data: {
                 //Bring in data
-                labels: ["Jan", "Feb", "March"],
-                datasets: [
-                    {
-                        label: "Sales",
-                        data: [86, 67, 91],
-                    }
-                ]
+                labels: props.labels,
+                datasets: props.datasets
             },
             options: {
                 //Customize chart options
