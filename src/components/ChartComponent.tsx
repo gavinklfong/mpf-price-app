@@ -18,7 +18,7 @@ import {
     IonSelectOption
   } from '@ionic/react';
   import { book, build, colorFill, grid } from 'ionicons/icons';
-  import React, { useEffect, useRef } from 'react';
+  import React, { useEffect, useRef, useState } from 'react';
   import Chart from 'chart.js';
 
 
@@ -43,17 +43,20 @@ import {
   const ChartComponent: React.FC<Props> = ( props ) => {
 
     const chartRef = useRef<HTMLCanvasElement>(null);
-    let chart: any;
+    const [chart, setChart] = useState();
 
     useEffect(() => {
 
         try {
-            chart.destroy();
+            if (chart !== null || chart !== undefined) {
+                console.log("chart.destory()");
+                chart.destroy();
+            }
         } catch (e) {};
 
         const chartRenderingCtxRef: CanvasRenderingContext2D = chartRef?.current?.getContext("2d")!;
         
-        chart = new Chart(chartRenderingCtxRef, {
+         let newChart = new Chart(chartRenderingCtxRef, {
             type: props.type,
             data: {
                 //Bring in data
@@ -64,6 +67,8 @@ import {
                 //Customize chart options
             }
         });
+
+        setChart(newChart);
         
     }, [props.datasets]);
 
