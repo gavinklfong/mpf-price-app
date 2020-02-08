@@ -43,12 +43,17 @@ import {
   const ChartComponent: React.FC<Props> = ( props ) => {
 
     const chartRef = useRef<HTMLCanvasElement>(null);
+    let chart: any;
 
     useEffect(() => {
 
+        try {
+            chart.destroy();
+        } catch (e) {};
+
         const chartRenderingCtxRef: CanvasRenderingContext2D = chartRef?.current?.getContext("2d")!;
         
-        new Chart(chartRenderingCtxRef, {
+        chart = new Chart(chartRenderingCtxRef, {
             type: props.type,
             data: {
                 //Bring in data
@@ -60,7 +65,7 @@ import {
             }
         });
         
-    }, []);
+    }, [props.datasets]);
 
     return (
         <div>

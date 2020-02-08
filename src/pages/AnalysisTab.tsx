@@ -1,23 +1,41 @@
 import React, {useEffect} from 'react';
 import { IonContent, IonHeader, IonItem, IonLabel, IonList, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 import axios, {AxiosRequestConfig} from 'axios';
+import { MPFService, MPFFundPrice } from '../services/MPFService';
 
 const AnalysisTab: React.FC = () => {
 
   useEffect(() => {
     // Create an scoped async function in the hook
     async function anyNameFunction() {
-      let requestOptions: AxiosRequestConfig = {
-        method: 'GET',
-        headers : {
-            "x-api-key": "Whalebig27Whalebig27",
-        }
-      };
+      // let requestOptions: AxiosRequestConfig = {
+      //   method: 'GET',
+      //   headers : {
+      //       "x-api-key": "Whalebig27Whalebig27",
+      //   }
+      // };
       
-      console.log("invoking API");
-      let response = await axios.get(encodeURI("https://aifobzeuf2.execute-api.us-east-2.amazonaws.com/dev/mpf/HSBC/schemes/SuperTrust Plus/funds/North American Equity Fund/price?startDate=20190101&endDate=20200115&timePeriod=M"), requestOptions)
-      console.log("result")
-      console.log(JSON.stringify(response));
+      // console.log("invoking API");
+      // let response = await axios.get(encodeURI("https://aifobzeuf2.execute-api.us-east-2.amazonaws.com/dev/mpf/HSBC/schemes/SuperTrust Plus/funds/North American Equity Fund/price?startDate=20190101&endDate=20200115&timePeriod=M"), requestOptions)
+      // console.log("result")
+      // console.log(JSON.stringify(response));
+    
+      let mpfService = new MPFService();
+
+      let query =  {
+          trustee: "HSBC",
+          scheme: "SuperTrust Plus",
+          fund: "North American Equity Fund",
+          startDate: 20191101,
+          endDate: 20200201,
+          timePeriod: "D"
+      }
+
+      let prices: MPFFundPrice[]  = await mpfService.getFundPrices(query);
+
+      console.log("MPFFundPrice: " + JSON.stringify(prices));
+    
+    
     }
     // Execute the created function directly
     anyNameFunction();
