@@ -16,12 +16,14 @@ import {
   IonTitle,
   IonToolbar,
   IonSelect,
-  IonSelectOption
+  IonSelectOption,
+  IonLoading,
+  IonRange
 } from '@ionic/react';
 import { book, build, colorFill, grid } from 'ionicons/icons';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import './ChartTab.css';
-import ChartComponent, { ChartDataPoint, ChartDataset }  from '../components/ChartComponent';
+import ChartComponent, { ChartDataPoint, ChartDataset, Props as ChartProps }  from '../components/ChartComponent';
 import { MPFService, MPFFundPrice, MPFFund, MPFFundPriceQuery } from '../services/MPFService';
 
 
@@ -50,11 +52,13 @@ const ChartTab: React.FC = () => {
   //   }
   // );
 
+  const [showLoading, setShowLoading] = useState(false);
   const [funds, setFunds] = useState(new Array<MPFFund>());
   const [selectedFund, setSelectedFund] = useState("");
   const [fundPrices, setFundPrices] = useState(new Array<MPFFundPrice>());
   const [chartDatasets, setChartDatasets] = useState(Array<ChartDataset>() );
   const [chartLabels, setChartLabels] = useState(new Array());
+  const [chartProps, setChartProps] = useState<ChartProps>();
 
 
   const trustee = "HSBC";
@@ -63,14 +67,15 @@ const ChartTab: React.FC = () => {
   const mpfService = new MPFService();
 
 
-  const retrieveMPFFunds = async () => {
-    let retrievedFunds = await mpfService.getFunds(trustee, scheme);
-    setFunds(retrievedFunds);
-    console.log("retrieveMPFFunds()")
-    console.log(JSON.stringify(retrievedFunds));
+  const retrieveMPFFunds = async (): Promise<MPFFund[]> => {
+    return await mpfService.getFunds(trustee, scheme);
+    // setFunds(retrievedFunds);
+    // console.log("retrieveMPFFunds()")
+    // console.log(JSON.stringify(retrievedFunds));
+
   }
 
-  const retrieveMPFFundPrices = async () => {
+  const retrieveMPFFundPrices = async (): Promise<MPFFundPrice[]> => {
     console.log("retrieveMPFFundPrices()");
 
     let fundPriceQuery: MPFFundPriceQuery = {
@@ -81,17 +86,16 @@ const ChartTab: React.FC = () => {
       endDate: 20200201
     }
 
-    let retrievedMPFFundPrices = await mpfService.getFundPrices(fundPriceQuery);
-    setFundPrices(retrievedMPFFundPrices);
+    return await mpfService.getFundPrices(fundPriceQuery);
   }
 
-  const updateChartData = () => {
+  const updateChartData = (prices: Array<MPFFundPrice>) => {
    console.log("updateChartData()");
 
-    let labels = Array<String>();
+    let labels = Array<string>();
     let data = Array<ChartDataPoint>();
 
-    fundPrices.map((item: MPFFundPrice) => {
+    prices.map((item: MPFFundPrice) => {
       let dateMoment = moment(item.date, "YYYYMMDD");
       let dateString = dateMoment.format("YYYY-MM-DD");
       labels.push(dateString);
@@ -108,14 +112,36 @@ const ChartTab: React.FC = () => {
       }
     );
 
+    console.log("updateChartData() - datasets: " + JSON.stringify(datasets));
+    console.log("updateChartData() - labels: " + JSON.stringify(labels));
+    
+    let chartProps: ChartProps = {
+      type: "line",
+      labels: labels,
+      datasets: datasets
+    }
+
+    setChartProps(chartProps);
     setChartDatasets(datasets);
     setChartLabels(labels);
 
   }
 
-  const fundSelected = (e: any) => {
+  const fundSelected = async (e: any) => {
     console.log("Fund selected. " + e.target.value);
     setSelectedFund(e.target.value);
+
+    // setShowLoading(true);
+      
+    // // let retrievedFunds = await retrieveMPFFunds();
+    // // setFunds(retrievedFunds);
+    
+    // let retrievedMPFFundPrices = await retrieveMPFFundPrices();
+    // setFundPrices(retrievedMPFFundPrices);
+
+    // updateChartData(retrievedMPFFundPrices);
+
+    // setShowLoading(false);
   }
 
 
@@ -124,9 +150,17 @@ const ChartTab: React.FC = () => {
     console.log("useEffect() triggered");
 
     let process = async () => {
-      await retrieveMPFFunds();
-      await retrieveMPFFundPrices();
-      updateChartData();
+      setShowLoading(true);
+      
+      let retrievedFunds = await retrieveMPFFunds();
+      setFunds(retrievedFunds);
+      
+      let retrievedMPFFundPrices = await retrieveMPFFundPrices();
+      setFundPrices(retrievedMPFFundPrices);
+
+      updateChartData(retrievedMPFFundPrices);
+
+      setShowLoading(false);
     }
 
     process();
@@ -161,16 +195,27 @@ const ChartTab: React.FC = () => {
             <IonSelect interface="action-sheet" onIonChange={fundSelected}>
               { funds.map((item: MPFFund) => {
                 return (
-                  <IonSelectOption value={item.fund}>{item.fund}</IonSelectOption>
+                  <IonSelectOption key={item.fund} value={item.fund}>{item.fund}</IonSelectOption>
                 );
               })}
             </IonSelect>
-          </IonItem>          
+          </IonItem>  
+          <IonItem>
+            <IonRange min={3} max={24} step={3} snaps dualKnobs ticks color="danger">
+              <IonIcon size="small" slot="start" name="sunny" />
+              <IonIcon slot="end" name="sunny" />
+            </IonRange>
+          </IonItem>        
         </IonList>
         </IonCard>
         <IonCard>
-          <ChartComponent type="line" labels={chartLabels} datasets={chartDatasets}/>
+          <ChartComponent type="line" labels={chartLabels} datasets={chartDatasets} />
         </IonCard>
+        <IonLoading
+        isOpen={showLoading}
+        onDidDismiss={() => setShowLoading(false)}
+        message={'Loading...'}
+      />
       </IonContent>
     </IonPage>
   );

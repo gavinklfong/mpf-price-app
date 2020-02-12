@@ -18,7 +18,7 @@ import {
     IonSelectOption
   } from '@ionic/react';
   import { book, build, colorFill, grid } from 'ionicons/icons';
-  import React, { useEffect, useRef, useState } from 'react';
+  import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
   import Chart from 'chart.js';
 
 
@@ -33,30 +33,38 @@ import {
       borderColor?: string;
       fill?: boolean;
   }
-  interface Props {
+  
+  export interface Props {
     type: string,
     labels: Array<string>,
     datasets: Array<ChartDataset>
   }
 
+  let chart: any = null;
 
   const ChartComponent: React.FC<Props> = ( props ) => {
 
-    const chartRef = useRef<HTMLCanvasElement>(null);
-    const [chart, setChart] = useState();
+    const chartRef = useRef<any>();
+    // const [chart, setChart] = useState();
 
-    useEffect(() => {
+    // useEffect(() => {
 
         try {
             if (chart !== null || chart !== undefined) {
-                console.log("chart.destory()");
+                console.log("chart.destroy()");
                 chart.destroy();
             }
-        } catch (e) {};
+        } catch (e) {
+            console.log("exception occur while trying to destroy chart");
+            console.log(e);
+        };
 
+        // if (typeof chart !== "undefined") chart.destory();
+
+        try {
         const chartRenderingCtxRef: CanvasRenderingContext2D = chartRef?.current?.getContext("2d")!;
         
-         let newChart = new Chart(chartRenderingCtxRef, {
+        chart = new Chart(chartRenderingCtxRef, {
             type: props.type,
             data: {
                 //Bring in data
@@ -68,9 +76,14 @@ import {
             }
         });
 
-        setChart(newChart);
+        // setChart(newChart);
         
-    }, [props.datasets]);
+    // }, [props.datasets]);
+
+    } catch (e) {
+        console.log("error occured when trying format chart data");
+        console.log(e);
+    }
 
     return (
         <div>
