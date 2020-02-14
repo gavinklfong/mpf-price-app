@@ -44,46 +44,58 @@ import {
 
   const ChartComponent: React.FC<Props> = ( props ) => {
 
+    console.log("ChartComponent render()");
+    
     const chartRef = useRef<any>();
     // const [chart, setChart] = useState();
 
-    // useEffect(() => {
+    useEffect(() => {
+
+        // try {
+        //     if (chart !== null || chart !== undefined) {
+        //         console.log("chart.destroy()");
+        //         chart.destroy();
+        //     }
+        // } catch (e) {
+        //     console.log("exception occur while trying to destroy chart");
+        // };
 
         try {
-            if (chart !== null || chart !== undefined) {
-                console.log("chart.destroy()");
-                chart.destroy();
-            }
+            const chartRenderingCtxRef: CanvasRenderingContext2D = chartRef?.current?.getContext("2d")!;
+            
+            chart = new Chart(chartRenderingCtxRef, {
+                type: props.type,
+                data: {
+                    //Bring in data
+                    labels: props.labels,
+                    datasets: props.datasets
+                },
+                options: {
+                    //Customize chart options
+                }
+            });
+
+            // setChart(newChart);
+            
         } catch (e) {
-            console.log("exception occur while trying to destroy chart");
-            console.log(e);
-        };
+            console.log("error occured when trying format chart data");
+            // console.log(e);
+        }
 
-        // if (typeof chart !== "undefined") chart.destory();
+        return () => {
 
-        try {
-        const chartRenderingCtxRef: CanvasRenderingContext2D = chartRef?.current?.getContext("2d")!;
-        
-        chart = new Chart(chartRenderingCtxRef, {
-            type: props.type,
-            data: {
-                //Bring in data
-                labels: props.labels,
-                datasets: props.datasets
-            },
-            options: {
-                //Customize chart options
-            }
-        });
+            try {
+                if (chart !== null || chart !== undefined) {
+                    console.log("chart.destroy()");
+                    chart.destroy();
+                }
+            } catch (e) {
+                console.log("exception occur while trying to destroy chart");
+            };
+        }
 
-        // setChart(newChart);
-        
-    // }, [props.datasets]);
+    }, [props.datasets, props.labels]);
 
-    } catch (e) {
-        console.log("error occured when trying format chart data");
-        console.log(e);
-    }
 
     return (
         <div>

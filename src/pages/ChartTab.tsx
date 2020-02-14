@@ -121,8 +121,13 @@ const ChartTab: React.FC = () => {
       datasets: datasets
     }
 
+    console.log("updateChartData() setChartProps()");
     setChartProps(chartProps);
+
+    console.log("updateChartData() setChartDatasets()");
     setChartDatasets(datasets);
+
+    console.log("updateChartData() setChartLabels()");
     setChartLabels(labels);
 
   }
@@ -153,11 +158,14 @@ const ChartTab: React.FC = () => {
       setShowLoading(true);
       
       let retrievedFunds = await retrieveMPFFunds();
+      console.log("useEffect() setFund()");
       setFunds(retrievedFunds);
       
       let retrievedMPFFundPrices = await retrieveMPFFundPrices();
+      console.log("useEffect() setFundPrices()");
       setFundPrices(retrievedMPFFundPrices);
 
+      console.log("useEffect() updateChartData()");
       updateChartData(retrievedMPFFundPrices);
 
       setShowLoading(false);
