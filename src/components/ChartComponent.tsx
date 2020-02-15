@@ -71,7 +71,8 @@ import {
                     datasets: props.datasets
                 },
                 options: {
-                    //Customize chart options
+                    responsive: true,
+                    maintainAspectRatio: false,
                 }
             });
 
@@ -98,7 +99,7 @@ import {
 
 
     return (
-        <div>
+        <div style={{position: "relative", height:"50vh" }} >
             <canvas
                 id="myChart"
                 ref={chartRef}

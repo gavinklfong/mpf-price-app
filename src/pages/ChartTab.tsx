@@ -33,59 +33,42 @@ const randomByte = () => randomNumber(0, 255)
 const randomPercent = () => (randomNumber(50, 100) * 0.01).toFixed(2)
 const randomCssRgba = () => `rgba(${[randomByte(), randomByte(), randomByte(), randomPercent()].join(',')})`
 
+const mpfService = new MPFService();
+
+
 const ChartTab: React.FC = () => {
-
-  // let labels: Array<string> = ["Jan", "Feb", "March"];
-
-  // let data: Array<ChartDataPoint> = [];
-  // data.push({x: "Jan", y: 10});
-  // data.push({x: "Feb", y: 40});
-  // data.push({x: "March", y: 80});
-
-  // let datasets: Array<ChartDataset> = [];
-  // datasets.push(
-  //   {
-  //     label: "Sales",
-  //     data: data,
-  //     borderColor: randomCssRgba(),
-  //     fill: false
-  //   }
-  // );
 
   const [showLoading, setShowLoading] = useState(false);
   const [funds, setFunds] = useState(new Array<MPFFund>());
-  const [selectedFund, setSelectedFund] = useState("");
-  const [fundPrices, setFundPrices] = useState(new Array<MPFFundPrice>());
   const [chartDatasets, setChartDatasets] = useState(Array<ChartDataset>() );
   const [chartLabels, setChartLabels] = useState(new Array());
-  const [chartProps, setChartProps] = useState<ChartProps>();
+  const [fundPriceQuery, setFundPriceQuery] = useState({
+    trustee: "HSBC",
+    scheme: "SuperTrust Plus",
+    fund: "European Equity Fund",
+    startDate: 20191101,
+    endDate: 20200201
+  });
 
 
-  const trustee = "HSBC";
-  const scheme = "SuperTrust Plus";
+  const setSelectedTrustee = (trustee: string) => {
+    setFundPriceQuery({...fundPriceQuery, trustee: trustee});
+  }
 
-  const mpfService = new MPFService();
+  const setSelectedScheme = (scheme: string) => {
+      setFundPriceQuery({...fundPriceQuery, scheme: scheme});
+  }
 
+  const setSelectedFund = (fund: string) => {
+      setFundPriceQuery({...fundPriceQuery, fund: fund});
+  }
 
   const retrieveMPFFunds = async (): Promise<MPFFund[]> => {
-    return await mpfService.getFunds(trustee, scheme);
-    // setFunds(retrievedFunds);
-    // console.log("retrieveMPFFunds()")
-    // console.log(JSON.stringify(retrievedFunds));
-
+    return await mpfService.getFunds(fundPriceQuery.trustee, fundPriceQuery.scheme);
   }
 
   const retrieveMPFFundPrices = async (): Promise<MPFFundPrice[]> => {
     console.log("retrieveMPFFundPrices()");
-
-    let fundPriceQuery: MPFFundPriceQuery = {
-      trustee: trustee,
-      scheme: scheme,
-      fund: selectedFund,
-      startDate: 20191101,
-      endDate: 20200201
-    }
-
     return await mpfService.getFundPrices(fundPriceQuery);
   }
 
@@ -105,7 +88,7 @@ const ChartTab: React.FC = () => {
     let datasets = Array<ChartDataset>();
     datasets.push(
       {
-        label: selectedFund,
+        label: fundPriceQuery.fund,
         data: data,
         borderColor: randomCssRgba(),
         fill: false
@@ -121,9 +104,6 @@ const ChartTab: React.FC = () => {
       datasets: datasets
     }
 
-    console.log("updateChartData() setChartProps()");
-    setChartProps(chartProps);
-
     console.log("updateChartData() setChartDatasets()");
     setChartDatasets(datasets);
 
@@ -132,48 +112,39 @@ const ChartTab: React.FC = () => {
 
   }
 
-  const fundSelected = async (e: any) => {
-    console.log("Fund selected. " + e.target.value);
-    setSelectedFund(e.target.value);
+  // refresh fund list
+  useEffect(() => {
 
-    // setShowLoading(true);
-      
-    // // let retrievedFunds = await retrieveMPFFunds();
-    // // setFunds(retrievedFunds);
+    setShowLoading(true);
+
+    (async() => {
+        let retrievedFunds = await retrieveMPFFunds();
+        console.log("useEffect() setFund()");
+        setFunds(retrievedFunds);
+        // setSelectedFund(retrievedFunds[0].fund);
+      }
+    )();
     
-    // let retrievedMPFFundPrices = await retrieveMPFFundPrices();
-    // setFundPrices(retrievedMPFFundPrices);
 
-    // updateChartData(retrievedMPFFundPrices);
+    setShowLoading(false);
 
-    // setShowLoading(false);
-  }
+  },[fundPriceQuery.scheme]);
 
-
+  // fetch fund price
   useEffect(() => { 
 
-    console.log("useEffect() triggered");
+    console.log("useEffect() selected fund change");
 
-    let process = async () => {
+    (async() => {
       setShowLoading(true);
       
-      let retrievedFunds = await retrieveMPFFunds();
-      console.log("useEffect() setFund()");
-      setFunds(retrievedFunds);
-      
       let retrievedMPFFundPrices = await retrieveMPFFundPrices();
-      console.log("useEffect() setFundPrices()");
-      setFundPrices(retrievedMPFFundPrices);
-
-      console.log("useEffect() updateChartData()");
       updateChartData(retrievedMPFFundPrices);
 
       setShowLoading(false);
-    }
+    })();
 
-    process();
-
-  }, [selectedFund]);
+  }, [fundPriceQuery.fund]);
 
 
   return (
@@ -188,19 +159,20 @@ const ChartTab: React.FC = () => {
         <IonList>
           <IonItem>
             <IonLabel>Trustee</IonLabel>
-            <IonSelect interface="action-sheet">
-              <IonSelectOption value="HSBC">HSBC</IonSelectOption>
+            <IonSelect interface="action-sheet" placeholder="-- Select Trustee --" value={fundPriceQuery.trustee} onIonChange={(e: any) => setSelectedTrustee(e.target.value)}>
+              <IonSelectOption key="HSBC" value="HSBC">HSBC</IonSelectOption>
+              <IonSelectOption key="SLF" value="SLF">SLF</IonSelectOption>
             </IonSelect>
           </IonItem>
           <IonItem>
             <IonLabel>Scheme</IonLabel>
-            <IonSelect interface="action-sheet">
-              <IonSelectOption value="TrustPlus">Trust Plus</IonSelectOption>
+            <IonSelect interface="action-sheet" placeholder="-- Select Scheme --" value={fundPriceQuery.scheme} onIonChange={(e: any) => setSelectedScheme(e.target.value) }>
+              <IonSelectOption key="SuperTrust Plus" value="SuperTrust Plus">SuperTrust Plus</IonSelectOption>
             </IonSelect>
           </IonItem>
           <IonItem>
             <IonLabel>Fund</IonLabel>
-            <IonSelect interface="action-sheet" onIonChange={fundSelected}>
+            <IonSelect interface="action-sheet" placeholder="-- All Funds --" selectedText={fundPriceQuery.fund} value={fundPriceQuery.fund} onIonChange={(e: any) => setSelectedFund(e.target.value) }>
               { funds.map((item: MPFFund) => {
                 return (
                   <IonSelectOption key={item.fund} value={item.fund}>{item.fund}</IonSelectOption>
@@ -209,9 +181,10 @@ const ChartTab: React.FC = () => {
             </IonSelect>
           </IonItem>  
           <IonItem>
-            <IonRange min={3} max={24} step={3} snaps dualKnobs ticks color="danger">
-              <IonIcon size="small" slot="start" name="sunny" />
-              <IonIcon slot="end" name="sunny" />
+            <IonLabel>Range</IonLabel>
+            <IonRange name="range" value={1} min={1} max={12} step={3} snaps ticks color="danger">
+                <IonLabel slot="start">1 Month</IonLabel>
+                <IonLabel slot="end">12 Months</IonLabel>
             </IonRange>
           </IonItem>        
         </IonList>
@@ -219,11 +192,14 @@ const ChartTab: React.FC = () => {
         <IonCard>
           <ChartComponent type="line" labels={chartLabels} datasets={chartDatasets} />
         </IonCard>
+
+        {/* Overlay to show while data fetching */}
         <IonLoading
         isOpen={showLoading}
         onDidDismiss={() => setShowLoading(false)}
         message={'Loading...'}
-      />
+        />
+
       </IonContent>
     </IonPage>
   );
