@@ -38,18 +38,27 @@ const mpfService = new MPFService();
 
 const ChartTab: React.FC = () => {
 
+  const [trusteeEntries, setTrusteeEntries] = useState(new Array<MPFFund>());
   const [showLoading, setShowLoading] = useState(false);
+  const [trustees, setTrustees] = useState(new Array<string>());
+  const [schemes, setSchemes] = useState(new Array<string>());
   const [funds, setFunds] = useState(new Array<MPFFund>());
   const [chartDatasets, setChartDatasets] = useState(Array<ChartDataset>() );
   const [chartLabels, setChartLabels] = useState(new Array());
-  const [fundPriceQuery, setFundPriceQuery] = useState({
-    trustee: "HSBC",
-    scheme: "SuperTrust Plus",
-    fund: "European Equity Fund",
+  // const [fundPriceQuery, setFundPriceQuery] = useState<MPFFundPriceQuery>({
+  //   trustee: "HSBC",
+  //   scheme: "SuperTrust Plus",
+  //   fund: "European Equity Fund",
+  //   startDate: 20191101,
+  //   endDate: 20200201
+  // });
+  const [fundPriceQuery, setFundPriceQuery] = useState<MPFFundPriceQuery>({
+    trustee: "",
+    scheme: "",
+    fund: "",
     startDate: 20191101,
     endDate: 20200201
   });
-
 
   const setSelectedTrustee = (trustee: string) => {
     setFundPriceQuery({...fundPriceQuery, trustee: trustee});
@@ -112,36 +121,80 @@ const ChartTab: React.FC = () => {
 
   }
 
-  // refresh fund list
+  // retrieve trustee list
+  useEffect(() => {
+      (async() => {
+        let retrievedTrustees = await mpfService.getTrustees();
+        console.log("retrieved trustees: " + retrievedTrustees);
+        setTrustees(retrievedTrustees);
+        // if (retrievedTrustees && retrievedTrustees.length > 0) {
+        //     let defaultSeltectedTrustee = retrievedTrustees[0];
+        //     setFundPriceQuery({...fundPriceQuery, trustee: defaultSeltectedTrustee});
+        // }
+      }
+      )();
+  }, []);
+
+  // On trustee selected
+  useEffect(() => {
+    (async() => {
+
+      // setShowLoading(true);
+
+      let retrievedFunds = await mpfService.getTrustee(fundPriceQuery.trustee);
+      setTrusteeEntries(retrievedFunds);
+
+      let schemeSet =  new Set<string>();
+      retrievedFunds.forEach(item => {
+          schemeSet.add(item.scheme);
+      });
+      let retrievedSchemes = Array.from(schemeSet);
+      console.log("retrieved schemes for selected trustee: " + JSON.stringify(retrievedSchemes));
+
+      setSchemes(retrievedSchemes);
+
+      if (retrievedFunds && retrievedFunds.length > 0) {
+        let defaultSelectedScheme = retrievedFunds[0].scheme;
+        setFundPriceQuery({...fundPriceQuery, scheme: defaultSelectedScheme});
+        // setFundPriceQuery(query => ({...query, cheme: defaultSelectedScheme}));
+
+      }
+
+      // setShowLoading(false);
+    }
+    )();
+  }, [fundPriceQuery.trustee]);
+
+  // on scheme selected
   useEffect(() => {
 
-    setShowLoading(true);
+    // setShowLoading(true);
 
-    (async() => {
-        let retrievedFunds = await retrieveMPFFunds();
-        console.log("useEffect() setFund()");
-        setFunds(retrievedFunds);
-        // setSelectedFund(retrievedFunds[0].fund);
-      }
-    )();
-    
+    let fundList = trusteeEntries.filter(item => item.scheme === fundPriceQuery.scheme);
+    if (fundList && fundList.length > 0) {
+        setFunds(fundList);
+        setFundPriceQuery(query => ({...query, fund: fundList[0].fund}));
+    }
+    // setShowLoading(false);
 
-    setShowLoading(false);
+  },[fundPriceQuery.scheme, trusteeEntries]);
 
-  },[fundPriceQuery.scheme]);
-
-  // fetch fund price
+  // on fund selected
   useEffect(() => { 
 
     console.log("useEffect() selected fund change");
 
     (async() => {
-      setShowLoading(true);
-      
-      let retrievedMPFFundPrices = await retrieveMPFFundPrices();
-      updateChartData(retrievedMPFFundPrices);
+      if (fundPriceQuery.fund != null && fundPriceQuery.fund.length > 0) {
 
-      setShowLoading(false);
+        setShowLoading(true);
+      
+        let retrievedMPFFundPrices = await retrieveMPFFundPrices();
+        updateChartData(retrievedMPFFundPrices);
+  
+        setShowLoading(false);
+      }
+
     })();
 
   }, [fundPriceQuery.fund]);
@@ -159,15 +212,24 @@ const ChartTab: React.FC = () => {
         <IonList>
           <IonItem>
             <IonLabel>Trustee</IonLabel>
-            <IonSelect interface="action-sheet" placeholder="-- Select Trustee --" value={fundPriceQuery.trustee} onIonChange={(e: any) => setSelectedTrustee(e.target.value)}>
-              <IonSelectOption key="HSBC" value="HSBC">HSBC</IonSelectOption>
-              <IonSelectOption key="SLF" value="SLF">SLF</IonSelectOption>
-            </IonSelect>
+            <IonSelect interface="action-sheet" placeholder="-- Select Trustee --" 
+              selectedText={fundPriceQuery.trustee} value={fundPriceQuery.trustee} 
+              onIonChange={(e: any) => setSelectedTrustee(e.target.value) }>
+              { trustees.map((item: string) => {
+                return (
+                  <IonSelectOption key={item} value={item}>{item}</IonSelectOption>
+                );
+              })}
+            </IonSelect>            
           </IonItem>
           <IonItem>
             <IonLabel>Scheme</IonLabel>
-            <IonSelect interface="action-sheet" placeholder="-- Select Scheme --" value={fundPriceQuery.scheme} onIonChange={(e: any) => setSelectedScheme(e.target.value) }>
-              <IonSelectOption key="SuperTrust Plus" value="SuperTrust Plus">SuperTrust Plus</IonSelectOption>
+            <IonSelect interface="action-sheet" placeholder="-- Select Scheme --" selectedText={fundPriceQuery.scheme} value={fundPriceQuery.scheme} onIonChange={(e: any) => setSelectedScheme(e.target.value) }>
+               { schemes.map((item) => {
+                  return (
+                    <IonSelectOption key={item} value={item}>{item}</IonSelectOption>
+                  );
+               })}               
             </IonSelect>
           </IonItem>
           <IonItem>

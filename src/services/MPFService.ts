@@ -18,14 +18,6 @@ export interface MPFFundPrice {
     price: number;
 }
 
-export interface MPFTrustee {
-    trustee: string
-}
-
-export interface MPFScheme {
-    trustee: string;
-    scheme: string;
-}
 export interface MPFFund {
     trustee: string;
     scheme: string;
@@ -35,8 +27,20 @@ export interface MPFFund {
 const MPF_URL1 = "https://aifobzeuf2.execute-api.us-east-2.amazonaws.com/dev/mpf/HSBC/schemes/SuperTrust Plus/funds/North American Equity Fund/price?startDate=20190101&endDate=20200115&timePeriod=M";
 const MPF_BASE_URL = "https://aifobzeuf2.execute-api.us-east-2.amazonaws.com/dev/mpf/";
 
+const API_KEY = "Whalebig27Whalebig27";
 
 export class MPFService {
+
+    prepareRequestConfig(params: any): AxiosRequestConfig {
+        return  {
+            method: 'GET',
+            headers : {
+                "x-api-key": API_KEY
+            },
+            params: params
+          };
+    }
+    
 
     getFundPrices(query: MPFFundPriceQuery): Promise<MPFFundPrice[]> {
 
@@ -53,13 +57,7 @@ export class MPFService {
 
         let params: any = this.buildParams(query);
 
-        let requestOptions: AxiosRequestConfig = {
-            method: 'GET',
-            headers : {
-                "x-api-key": "Whalebig27Whalebig27"
-            },
-            params: params
-          };
+        let requestOptions: AxiosRequestConfig = this.prepareRequestConfig(params);
 
           let completedUrl = MPF_BASE_URL + urlPath;
           
@@ -73,12 +71,35 @@ export class MPFService {
             .then(res => this.formatFundPriceResult(res))
     }
 
-    getTrustees() {
+    getTrustees(): Promise<string[]> {
+        console.log("getTrustee()");
 
+        let requestOptions: AxiosRequestConfig = this.prepareRequestConfig({});
+
+        return axios.get(encodeURI(MPF_BASE_URL), requestOptions)
+          .then((response: any)  => { 
+              console.log(response.data);
+              return response.data;
+          })
     }
 
-    getSchemes(trustee: string) {
+    getTrustee(trustee: string): Promise<MPFFund[]> {
 
+        console.log("getTrustee()");
+        console.log("trustee: " + trustee);
+
+        let urlPathArray = new Array<string>()
+        urlPathArray.push(trustee);
+        let urlPath = urlPathArray.join("/");  
+        let completedUrl = MPF_BASE_URL + urlPath;
+        let requestOptions: AxiosRequestConfig = this.prepareRequestConfig({});
+
+
+        return axios.get(encodeURI(completedUrl), requestOptions)
+          .then((response: any)  => { 
+              console.log(response.data);
+              return response.data;
+          })
     }
 
     getFunds(trustee: string, scheme: string): Promise<MPFFund[]> {
@@ -94,12 +115,7 @@ export class MPFService {
         let completedUrl = MPF_BASE_URL + urlPath;
         console.log("completedUrl : " + completedUrl);
 
-        let requestOptions: AxiosRequestConfig = {
-            method: 'GET',
-            headers : {
-                "x-api-key": "Whalebig27Whalebig27"
-            }
-          };
+        let requestOptions: AxiosRequestConfig = this.prepareRequestConfig({});
 
         return axios.get(encodeURI(completedUrl), requestOptions)
           .then((response: any)  => { 
