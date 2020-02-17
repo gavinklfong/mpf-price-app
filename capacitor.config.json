@@ -1,0 +1,8 @@
+{
+  "appId": "io.ionic.starter",
+  "appName": "mpf-price-app",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "build",
+  "cordova": {}
+}

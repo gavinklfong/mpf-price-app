@@ -18,7 +18,12 @@ import {
   IonSelect,
   IonSelectOption,
   IonLoading,
-  IonRange
+  IonRange,
+  IonToggle,
+  IonNote,
+  IonSpinner,
+  IonSegment,
+  IonSegmentButton
 } from '@ionic/react';
 import { book, build, colorFill, grid } from 'ionicons/icons';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
@@ -43,21 +48,22 @@ const ChartTab: React.FC = () => {
   const [trustees, setTrustees] = useState(new Array<string>());
   const [schemes, setSchemes] = useState(new Array<string>());
   const [funds, setFunds] = useState(new Array<MPFFund>());
+
+  const [queryRange, setQueryRange] = useState<number>(1);
+  const [displayInPercent, setDisplayInPercent] = useState(true);
+
+  const [pricePeriod, setPricePeriod] = useState<string>("D");
+
+  const [fundPrices, setFundPrices] = useState(new Array<MPFFundPrice>());
   const [chartDatasets, setChartDatasets] = useState(Array<ChartDataset>() );
   const [chartLabels, setChartLabels] = useState(new Array());
-  // const [fundPriceQuery, setFundPriceQuery] = useState<MPFFundPriceQuery>({
-  //   trustee: "HSBC",
-  //   scheme: "SuperTrust Plus",
-  //   fund: "European Equity Fund",
-  //   startDate: 20191101,
-  //   endDate: 20200201
-  // });
+
   const [fundPriceQuery, setFundPriceQuery] = useState<MPFFundPriceQuery>({
     trustee: "",
     scheme: "",
     fund: "",
-    startDate: 20191101,
-    endDate: 20200201
+    startDate: +(moment().subtract("months", 6).format("YYYYMMDD")),
+    endDate: +(moment().format("YYYYMMDD"))
   });
 
   const setSelectedTrustee = (trustee: string) => {
@@ -72,8 +78,10 @@ const ChartTab: React.FC = () => {
       setFundPriceQuery({...fundPriceQuery, fund: fund});
   }
 
-  const retrieveMPFFunds = async (): Promise<MPFFund[]> => {
-    return await mpfService.getFunds(fundPriceQuery.trustee, fundPriceQuery.scheme);
+  const setSelectedQueryRange = (range: number) => {
+      let newStartDate = moment().subtract("months", range);
+      setFundPriceQuery({...fundPriceQuery, startDate: +(newStartDate.format("YYYYMMDD"))});
+      setQueryRange(range);
   }
 
   const retrieveMPFFundPrices = async (): Promise<MPFFundPrice[]> => {
@@ -81,18 +89,29 @@ const ChartTab: React.FC = () => {
     return await mpfService.getFundPrices(fundPriceQuery);
   }
 
-  const updateChartData = (prices: Array<MPFFundPrice>) => {
+  const prepareChartData = (prices: Array<MPFFundPrice>, inPercent: boolean): [Array<string>, Array<ChartDataset>] => {
    console.log("updateChartData()");
 
     let labels = Array<string>();
     let data = Array<ChartDataPoint>();
 
-    prices.map((item: MPFFundPrice) => {
-      let dateMoment = moment(item.date, "YYYYMMDD");
-      let dateString = dateMoment.format("YYYY-MM-DD");
-      labels.push(dateString);
-      data.push({x: dateString, y: item.price});
-    });
+    if (prices && prices.length > 0) {
+
+        let initialPrice = prices[0].price;
+        prices.forEach((item: MPFFundPrice) => {
+          let dateMoment = moment(item.date, "YYYYMMDD");
+          let dateString = dateMoment.format("YYYY-MM-DD");
+          
+          labels.push(dateString);
+
+          if (inPercent) {
+              let priceInPercent = ((item.price - initialPrice) / initialPrice) * 100;
+              data.push({x: dateString, y: priceInPercent});
+          } else {
+               data.push({x: dateString, y: item.price});
+          }
+        });
+    }
 
     let datasets = Array<ChartDataset>();
     datasets.push(
@@ -106,19 +125,8 @@ const ChartTab: React.FC = () => {
 
     console.log("updateChartData() - datasets: " + JSON.stringify(datasets));
     console.log("updateChartData() - labels: " + JSON.stringify(labels));
-    
-    let chartProps: ChartProps = {
-      type: "line",
-      labels: labels,
-      datasets: datasets
-    }
 
-    console.log("updateChartData() setChartDatasets()");
-    setChartDatasets(datasets);
-
-    console.log("updateChartData() setChartLabels()");
-    setChartLabels(labels);
-
+    return [labels, datasets];
   }
 
   // retrieve trustee list
@@ -139,7 +147,7 @@ const ChartTab: React.FC = () => {
   useEffect(() => {
     (async() => {
 
-      // setShowLoading(true);
+      setShowLoading(true);
 
       let retrievedFunds = await mpfService.getTrustee(fundPriceQuery.trustee);
       setTrusteeEntries(retrievedFunds);
@@ -157,10 +165,9 @@ const ChartTab: React.FC = () => {
         let defaultSelectedScheme = retrievedFunds[0].scheme;
         setFundPriceQuery({...fundPriceQuery, scheme: defaultSelectedScheme});
         // setFundPriceQuery(query => ({...query, cheme: defaultSelectedScheme}));
-
       }
 
-      // setShowLoading(false);
+      setShowLoading(false);
     }
     )();
   }, [fundPriceQuery.trustee]);
@@ -187,18 +194,36 @@ const ChartTab: React.FC = () => {
     (async() => {
       if (fundPriceQuery.fund != null && fundPriceQuery.fund.length > 0) {
 
+        // setShowLoading(true);
         setShowLoading(true);
       
         let retrievedMPFFundPrices = await retrieveMPFFundPrices();
-        updateChartData(retrievedMPFFundPrices);
-  
+        setFundPrices(retrievedMPFFundPrices);
+
         setShowLoading(false);
       }
 
     })();
 
-  }, [fundPriceQuery.fund]);
+  }, [fundPriceQuery.fund, fundPriceQuery.startDate, fundPriceQuery.endDate, fundPriceQuery.timePeriod]);
 
+  useEffect(() => { 
+
+   setShowLoading(true);
+
+   console.log("useEffect() selected fund price change");
+
+   const [labels, datasets] = prepareChartData(fundPrices, displayInPercent);
+   console.log("updateChartData() setChartDatasets()");
+   setChartDatasets(datasets);
+
+   console.log("updateChartData() setChartLabels()");
+   setChartLabels(labels);
+
+   setShowLoading(false);
+
+ 
+ }, [fundPrices, displayInPercent]);
 
   return (
     <IonPage>
@@ -244,15 +269,31 @@ const ChartTab: React.FC = () => {
           </IonItem>  
           <IonItem>
             <IonLabel>Range</IonLabel>
-            <IonRange name="range" value={1} min={1} max={12} step={3} snaps ticks color="danger">
+            <IonRange name="range" value={queryRange} min={1} max={12} step={3} debounce={1000} snaps ticks color="danger"
+            onIonChange={(e: any) => setSelectedQueryRange(e.target.value)}>
                 <IonLabel slot="start">1 Month</IonLabel>
                 <IonLabel slot="end">12 Months</IonLabel>
             </IonRange>
-          </IonItem>        
+            <IonLabel>Percent</IonLabel>
+            <IonToggle checked={displayInPercent} onIonChange={(e: any) => setDisplayInPercent(!displayInPercent)}/>
+          </IonItem>   
+          <IonItem>
+            <IonSegment value={pricePeriod} onIonChange={e => { console.log('price period selected', e.detail.value); setFundPriceQuery({...fundPriceQuery, timePeriod: e.detail.value }); setPricePeriod(p => e.detail.value!)}}>
+               <IonSegmentButton value="D">
+               <IonLabel>Daily</IonLabel>
+               </IonSegmentButton>
+               <IonSegmentButton value="W">
+               <IonLabel>Weekly</IonLabel>
+               </IonSegmentButton>
+               <IonSegmentButton value="M">
+               <IonLabel>Monthly</IonLabel>
+               </IonSegmentButton>
+            </IonSegment>
+          </IonItem>     
         </IonList>
         </IonCard>
         <IonCard>
-          <ChartComponent type="line" labels={chartLabels} datasets={chartDatasets} />
+            <ChartComponent type="line" labels={chartLabels} datasets={chartDatasets} /> 
         </IonCard>
 
         {/* Overlay to show while data fetching */}

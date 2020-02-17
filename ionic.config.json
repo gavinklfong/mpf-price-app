@@ -1,5 +1,7 @@
 {
   "name": "mpf-price-app",
-  "integrations": {},
+  "integrations": {
+    "capacitor": {}
+  },
   "type": "react"
 }
