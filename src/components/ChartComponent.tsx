@@ -46,8 +46,14 @@ import {
 
     console.log("ChartComponent render()");
     
-    const chartRef = useRef<any>();
+    const chartRef: any = useRef();
     // const [chart, setChart] = useState();
+
+    // let gradientLine = chartRef
+    //     .createLinearGradient(0, 0, 1 * 2, 0);
+    // gradientLine.addColorStop(0, "#FF006E");
+    // gradientLine.addColorStop(1, "#F46036");
+
 
     useEffect(() => {
 
