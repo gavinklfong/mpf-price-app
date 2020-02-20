@@ -78,7 +78,7 @@ export class MPFService {
 
         return axios.get(encodeURI(MPF_BASE_URL), requestOptions)
           .then((response: any)  => { 
-              console.log(response.data);
+            //   console.log(response.data);
               return response.data;
           })
     }
@@ -97,7 +97,7 @@ export class MPFService {
 
         return axios.get(encodeURI(completedUrl), requestOptions)
           .then((response: any)  => { 
-              console.log(response.data);
+            //   console.log(response.data);
               return response.data;
           })
     }
@@ -119,7 +119,7 @@ export class MPFService {
 
         return axios.get(encodeURI(completedUrl), requestOptions)
           .then((response: any)  => { 
-              console.log(response.data.Items);
+            //   console.log(response.data.Items);
               return response.data.Items;
           })
           .then(res => this.formatFundListResult(res))

@@ -25,13 +25,33 @@ import {
   IonSegment,
   IonSegmentButton
 } from '@ionic/react';
+import { loadingController } from '@ionic/core';
 import { book, build, colorFill, grid } from 'ionicons/icons';
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useState, useRef} from 'react';
 import './ChartTab.css';
 import ChartComponent, { ChartDataPoint, ChartDataset, Props as ChartProps }  from '../components/ChartComponent';
 import { MPFService, MPFFundPrice, MPFFund, MPFFundPriceQuery } from '../services/MPFService';
 
+export interface ChartTabForm {
+   trusteeList?: string[],
+   schemeList?: string[],
+   fundList?: string[],
 
+   trustee: string,
+   scheme: string,
+   fund: string,
+
+   fundRecords?: MPFFund[]
+
+   displayInPercent: boolean,
+   queryTimeRange: number,
+   timePeriod: string,
+   
+   fundPrices?: MPFFundPrice[],
+
+   chartDatasets?: ChartDataset[],
+   chartLabels?: string[]
+}
 
 const randomNumber = (min:number, max:number) => Math.floor(Math.random() * (max - min + 1) + min);
 const randomByte = () => randomNumber(0, 255)
@@ -40,190 +60,265 @@ const randomCssRgba = () => `rgba(${[randomByte(), randomByte(), randomByte(), r
 
 const mpfService = new MPFService();
 
+// let loading: HTMLIonLoadingElement;
+// ( async () => {
+//    loading = await loadingController.create({
+//       message: 'Loading...',
+//       });
+// })();
 
 const ChartTab: React.FC = () => {
 
-  const [trusteeEntries, setTrusteeEntries] = useState(new Array<MPFFund>());
-  const [showLoading, setShowLoading] = useState(false);
-  const [trustees, setTrustees] = useState(new Array<string>());
-  const [schemes, setSchemes] = useState(new Array<string>());
-  const [funds, setFunds] = useState(new Array<MPFFund>());
-
-  const [queryRange, setQueryRange] = useState<number>(1);
-  const [displayInPercent, setDisplayInPercent] = useState(true);
-
-  const [pricePeriod, setPricePeriod] = useState<string>("D");
-
-  const [fundPrices, setFundPrices] = useState(new Array<MPFFundPrice>());
-  const [chartDatasets, setChartDatasets] = useState(Array<ChartDataset>() );
-  const [chartLabels, setChartLabels] = useState(new Array());
-
-  const [fundPriceQuery, setFundPriceQuery] = useState<MPFFundPriceQuery>({
-    trustee: "",
-    scheme: "",
-    fund: "",
-    startDate: +(moment().subtract("months", 6).format("YYYYMMDD")),
-    endDate: +(moment().format("YYYYMMDD"))
-  });
-
-  const setSelectedTrustee = (trustee: string) => {
-    setFundPriceQuery({...fundPriceQuery, trustee: trustee});
-  }
-
-  const setSelectedScheme = (scheme: string) => {
-      setFundPriceQuery({...fundPriceQuery, scheme: scheme});
-  }
-
-  const setSelectedFund = (fund: string) => {
-      setFundPriceQuery({...fundPriceQuery, fund: fund});
-  }
-
-  const setSelectedQueryRange = (range: number) => {
-      let newStartDate = moment().subtract("months", range);
-      setFundPriceQuery({...fundPriceQuery, startDate: +(newStartDate.format("YYYYMMDD"))});
-      setQueryRange(range);
-  }
-
-  const retrieveMPFFundPrices = async (): Promise<MPFFundPrice[]> => {
-    console.log("retrieveMPFFundPrices()");
-    return await mpfService.getFundPrices(fundPriceQuery);
-  }
-
-  const prepareChartData = (prices: Array<MPFFundPrice>, inPercent: boolean): [Array<string>, Array<ChartDataset>] => {
-   console.log("updateChartData()");
-
-    let labels = Array<string>();
-    let data = Array<ChartDataPoint>();
-
-    if (prices && prices.length > 0) {
-
-        let initialPrice = prices[0].price;
-        prices.forEach((item: MPFFundPrice) => {
-          let dateMoment = moment(item.date, "YYYYMMDD");
-          let dateString = dateMoment.format("YYYY-MM-DD");
-          
-          labels.push(dateString);
-
-          if (inPercent) {
-              let priceInPercent = ((item.price - initialPrice) / initialPrice) * 100;
-              data.push({x: dateString, y: priceInPercent});
-          } else {
-               data.push({x: dateString, y: item.price});
-          }
-        });
-    }
-
-    let datasets = Array<ChartDataset>();
-    datasets.push(
+   const [chartTabForm, setChartTabForm] = useState<ChartTabForm>(
       {
-        label: fundPriceQuery.fund,
-        data: data,
-        borderColor: randomCssRgba(),
-        fill: false
-      }
-    );
+         trustee: "", scheme: "", fund: "", 
+         displayInPercent: true, timePeriod: "D",
+         queryTimeRange: 1,
+         chartLabels: [], chartDatasets: [],
+         trusteeList: [], schemeList: [], fundList: []
+      });
 
-    console.log("updateChartData() - datasets: " + JSON.stringify(datasets));
-    console.log("updateChartData() - labels: " + JSON.stringify(labels));
-
-    return [labels, datasets];
-  }
+  const [showLoading, setShowLoading] = useState(false);
 
   // retrieve trustee list
   useEffect(() => {
       (async() => {
-        let retrievedTrustees = await mpfService.getTrustees();
-        console.log("retrieved trustees: " + retrievedTrustees);
-        setTrustees(retrievedTrustees);
-        // if (retrievedTrustees && retrievedTrustees.length > 0) {
-        //     let defaultSeltectedTrustee = retrievedTrustees[0];
-        //     setFundPriceQuery({...fundPriceQuery, trustee: defaultSeltectedTrustee});
-        // }
+      let retrievedTrustees = await mpfService.getTrustees();
+      console.log("retrieved trustees: " + retrievedTrustees);
+      let formData: ChartTabForm = {...chartTabForm, trusteeList: retrievedTrustees};
+      setChartTabForm(formData);
+
       }
       )();
-  }, []);
+   }, []);
 
-  // On trustee selected
-  useEffect(() => {
-    (async() => {
+   const handleInputChange = (e: any) => {
+      console.log(e.target.value);
+      console.log(e.target.name);
 
-      setShowLoading(true);
+      const {name, value} = e.target
+      if (!!value && typeof value !== "undefined" && value.length > 0) {
+         setChartTabForm({...chartTabForm, [name]: value})
+      }
+  }
 
-      let retrievedFunds = await mpfService.getTrustee(fundPriceQuery.trustee);
-      setTrusteeEntries(retrievedFunds);
+  const handleNumberInputChange = (e: any) => {
+      console.log(e.target.value);
+      console.log(e.target.name);
 
-      let schemeSet =  new Set<string>();
-      retrievedFunds.forEach(item => {
-          schemeSet.add(item.scheme);
-      });
-      let retrievedSchemes = Array.from(schemeSet);
-      console.log("retrieved schemes for selected trustee: " + JSON.stringify(retrievedSchemes));
+      const {name, value} = e.target
+      if (!!value && typeof value !== "undefined") {
+         let numberVal = +value;
+         setChartTabForm({...chartTabForm, [name]: numberVal})
+      }   
+   }
 
-      setSchemes(retrievedSchemes);
+   const handleToggleInputChange = (e: any) => {
+      console.log(e.target.checked);
+      console.log(e.target.name);
 
-      if (retrievedFunds && retrievedFunds.length > 0) {
-        let defaultSelectedScheme = retrievedFunds[0].scheme;
-        setFundPriceQuery({...fundPriceQuery, scheme: defaultSelectedScheme});
-        // setFundPriceQuery(query => ({...query, cheme: defaultSelectedScheme}));
+      const {name, checked} = e.target
+      if (checked != null && typeof checked !== "undefined") {
+         let booleanVal = Boolean(checked);
+         setChartTabForm({...chartTabForm, [name]: checked})
+      }   
+   }
+
+  const timePeriodSelected = (e: any) => {
+      console.log(e.target.value);
+      console.log(e.target.name);
+
+      const {name, value} = e.target
+      if (!!value && typeof value !== "undefined" && value.length > 0) {
+         setChartTabForm({...chartTabForm, timePeriod: value})
+      }   
+  }
+
+
+  const trusteeSelected = async (trustee: string) => {
+      console.log("trusteeSelected() - " + trustee);
+      if (!!trustee && typeof trustee !== "undefined") {
+         setChartTabForm({...chartTabForm, trustee: trustee});
       }
 
-      setShowLoading(false);
-    }
-    )();
-  }, [fundPriceQuery.trustee]);
+  }
 
-  // on scheme selected
   useEffect(() => {
 
-    // setShowLoading(true);
+      (async () => {
+         console.log("useEffect() - trusteeSelected() - " + chartTabForm.trustee);
 
-    let fundList = trusteeEntries.filter(item => item.scheme === fundPriceQuery.scheme);
-    if (fundList && fundList.length > 0) {
-        setFunds(fundList);
-        setFundPriceQuery(query => ({...query, fund: fundList[0].fund}));
-    }
-    // setShowLoading(false);
+         let scheme = "";
 
-  },[fundPriceQuery.scheme, trusteeEntries]);
+         if (!!chartTabForm.trustee && typeof chartTabForm.trustee !== "undefined" && chartTabForm.trustee.length > 0 ) {
+            // fetch trustee fund records
 
-  // on fund selected
-  useEffect(() => { 
+            // await loading.present();
 
-    console.log("useEffect() selected fund change");
-
-    (async() => {
-      if (fundPriceQuery.fund != null && fundPriceQuery.fund.length > 0) {
-
-        // setShowLoading(true);
-        setShowLoading(true);
+            let fundRecords = await mpfService.getTrustee(chartTabForm.trustee);
       
-        let retrievedMPFFundPrices = await retrieveMPFFundPrices();
-        setFundPrices(retrievedMPFFundPrices);
+            // set scheme dropdown list
+            let schemeSet =  new Set<string>();
+            fundRecords.forEach(item => {
+               schemeSet.add(item.scheme);
+            });
+            let schemeList = Array.from(schemeSet);
+      
+            // set selected scheme
+            if (!!schemeList && schemeList.length > 0) {
+               scheme = schemeList[0];
+            }
 
-        setShowLoading(false);
+            setChartTabForm({...chartTabForm, fundRecords: fundRecords, schemeList: schemeList, scheme: scheme});
+
+            // await loading.dismiss();
+
+       }
+      })()
+
+  }, [chartTabForm.trustee]);
+
+  const schemeSelected = (scheme: string) => {
+      console.log("schemeSelected() - " + scheme);
+      console.log("schemeSelected() - trustee: " + chartTabForm.trustee);
+
+      if (!!scheme && typeof scheme !== "undefined" && scheme.length > 0) {
+         setChartTabForm({...chartTabForm, scheme: scheme});
+      }// // set selected fund
+  }
+
+  useEffect(() => {
+
+   (async () => {
+      console.log("useEffect() - schemeSelected() - " + chartTabForm.scheme);
+      
+      let fund = "";
+
+      if (!!chartTabForm.scheme && chartTabForm.scheme.length > 0 &&
+         !!chartTabForm.fundRecords && chartTabForm.fundRecords.length > 0) {
+         chartTabForm.fundList = chartTabForm.fundRecords.filter(item => item.scheme === chartTabForm.scheme).map(item => item.fund);
+         if (!!chartTabForm.schemeList && chartTabForm.schemeList.length > 0) {
+            fund = chartTabForm.fundList[0];
+         }
+
+         // // fetch fund prices
+         // let fundPriceQuery: MPFFundPriceQuery = 
+         // {  trustee: chartTabForm.trustee, scheme: chartTabForm.scheme, fund: fund,
+         //    startDate: +(moment().subtract(chartTabForm.queryTimeRange, "months").format("YYYYMMDD")),
+         //    endDate: +(moment().format("YYYYMMDD")),
+         //    timePeriod: chartTabForm.timePeriod }
+
+         // let fundPrices = await mpfService.getFundPrices(fundPriceQuery);
+
+         setChartTabForm({...chartTabForm, fund: fund});  
       }
 
-    })();
+   })()
 
-  }, [fundPriceQuery.fund, fundPriceQuery.startDate, fundPriceQuery.endDate, fundPriceQuery.timePeriod]);
+   }, [chartTabForm.scheme]);
+
+  const fundSelected =  (fund: string) => {
+     if (!!fund && typeof fund !== "undefined" && fund.length > 0) {
+      setChartTabForm({...chartTabForm, fund: fund});
+     }
+  }
+
+  useEffect(() => {
+
+   ( async () => {
+
+      console.log("useEffect() - fundSelected() - " + chartTabForm.fund);
+
+      if (!!chartTabForm.fund && typeof chartTabForm.fund !== "undefined" && chartTabForm.fund.length > 0) {
+     
+         // await loading.present();
+
+         // fetch fund prices
+         let fundPriceQuery: MPFFundPriceQuery = 
+         {  trustee: chartTabForm.trustee, scheme: chartTabForm.scheme, fund: chartTabForm.fund,
+            startDate: +(moment().subtract(chartTabForm.queryTimeRange, "months").format("YYYYMMDD")),
+            endDate: +(moment().format("YYYYMMDD")),
+            timePeriod: chartTabForm.timePeriod }
+
+         console.log("mpfService.getFundPrices()");
+         let fundPrices = await mpfService.getFundPrices(fundPriceQuery);
+
+         setChartTabForm({...chartTabForm, fundPrices: fundPrices});
+
+         // await loading.dismiss();
+
+      }
+
+   })();
+
+  }, [chartTabForm.fund, chartTabForm.timePeriod, chartTabForm.queryTimeRange]);
+
+  const queryTimeRangeSelected = (range: number) => {
+      setChartTabForm({...chartTabForm, queryTimeRange: range});
+  }
 
   useEffect(() => { 
 
-   setShowLoading(true);
 
-   console.log("useEffect() selected fund price change");
+   ( async () => {
+      console.log("useEffect() selected fund price change");
+      console.log("fundPrices : " + chartTabForm.fundPrices?.length)
+      console.log("displayInPercent : " + chartTabForm.displayInPercent)
 
-   const [labels, datasets] = prepareChartData(fundPrices, displayInPercent);
-   console.log("updateChartData() setChartDatasets()");
-   setChartDatasets(datasets);
+      if (!!chartTabForm.fundPrices && chartTabForm.fundPrices.length > 0) {
 
-   console.log("updateChartData() setChartLabels()");
-   setChartLabels(labels);
+         // await loading.present();
 
-   setShowLoading(false);
+         const [labels, datasets] = prepareChartData(chartTabForm.fund, chartTabForm.fundPrices, chartTabForm.displayInPercent);
+         setChartTabForm({...chartTabForm, chartLabels: labels, chartDatasets: datasets}); 
 
- 
- }, [fundPrices, displayInPercent]);
+         // await loading.dismiss();
+
+      }
+
+   })();
+
+   }, [chartTabForm.fundPrices, chartTabForm.displayInPercent]);
+
+
+
+   const prepareChartData = (fund: string, prices: Array<MPFFundPrice> = [], inPercent: boolean): [Array<string>, Array<ChartDataset>] => {
+      console.log("updateChartData()");
+   
+       let labels = Array<string>();
+       let data = Array<ChartDataPoint>();
+   
+       if (prices && prices.length > 0) {
+   
+           let initialPrice = prices[0].price;
+           prices.forEach((item: MPFFundPrice) => {
+             let dateMoment = moment(item.date, "YYYYMMDD");
+             let dateString = dateMoment.format("YYYY-MM-DD");
+             
+             labels.push(dateString);
+   
+             if (inPercent) {
+                 let priceInPercent = ((item.price - initialPrice) / initialPrice) * 100;
+                 data.push({x: dateString, y: priceInPercent});
+             } else {
+                  data.push({x: dateString, y: item.price});
+             }
+           });
+       }
+   
+       let datasets = Array<ChartDataset>();
+       datasets.push(
+         {
+           label: fund,
+           data: data,
+           borderColor: randomCssRgba(),
+           fill: false
+         }
+       );
+   
+       return [labels, datasets];
+     }
+   
 
   return (
     <IonPage>
@@ -238,9 +333,10 @@ const ChartTab: React.FC = () => {
           <IonItem>
             <IonLabel>Trustee</IonLabel>
             <IonSelect interface="action-sheet" placeholder="-- Select Trustee --" 
-              selectedText={fundPriceQuery.trustee} value={fundPriceQuery.trustee} 
-              onIonChange={(e: any) => setSelectedTrustee(e.target.value) }>
-              { trustees.map((item: string) => {
+              name="trustee"
+              value={chartTabForm.trustee} 
+              onIonChange={handleInputChange}> 
+              { chartTabForm.trusteeList!.map((item: string) => {
                 return (
                   <IonSelectOption key={item} value={item}>{item}</IonSelectOption>
                 );
@@ -249,8 +345,11 @@ const ChartTab: React.FC = () => {
           </IonItem>
           <IonItem>
             <IonLabel>Scheme</IonLabel>
-            <IonSelect interface="action-sheet" placeholder="-- Select Scheme --" selectedText={fundPriceQuery.scheme} value={fundPriceQuery.scheme} onIonChange={(e: any) => setSelectedScheme(e.target.value) }>
-               { schemes.map((item) => {
+            <IonSelect interface="action-sheet" placeholder="-- Select Scheme --" 
+            name="scheme"
+            selectedText={chartTabForm.scheme} value={chartTabForm.scheme} 
+            onIonChange={handleInputChange} >
+               { chartTabForm.schemeList!.map((item) => {
                   return (
                     <IonSelectOption key={item} value={item}>{item}</IonSelectOption>
                   );
@@ -259,26 +358,29 @@ const ChartTab: React.FC = () => {
           </IonItem>
           <IonItem>
             <IonLabel>Fund</IonLabel>
-            <IonSelect interface="action-sheet" placeholder="-- All Funds --" selectedText={fundPriceQuery.fund} value={fundPriceQuery.fund} onIonChange={(e: any) => setSelectedFund(e.target.value) }>
-              { funds.map((item: MPFFund) => {
+            <IonSelect interface="action-sheet" placeholder="-- All Funds --" 
+            name="fund"
+            selectedText={chartTabForm.fund} value={chartTabForm.fund} 
+            onIonChange={handleInputChange} >
+              { chartTabForm.fundList!.map((item: string) => {
                 return (
-                  <IonSelectOption key={item.fund} value={item.fund}>{item.fund}</IonSelectOption>
+                  <IonSelectOption key={item} value={item}>{item}</IonSelectOption>
                 );
               })}
             </IonSelect>
           </IonItem>  
           <IonItem>
             <IonLabel>Range</IonLabel>
-            <IonRange name="range" value={queryRange} min={1} max={12} step={3} debounce={1000} snaps ticks color="danger"
-            onIonChange={(e: any) => setSelectedQueryRange(e.target.value)}>
+            <IonRange name="queryTimeRange" value={chartTabForm.queryTimeRange} min={1} max={12} step={3} debounce={1000} snaps ticks color="danger"
+            onIonChange={handleNumberInputChange} >
                 <IonLabel slot="start">1 Month</IonLabel>
                 <IonLabel slot="end">12 Months</IonLabel>
             </IonRange>
             <IonLabel>Percent</IonLabel>
-            <IonToggle checked={displayInPercent} onIonChange={(e: any) => setDisplayInPercent(!displayInPercent)}/>
+            <IonToggle name="displayInPercent" checked={chartTabForm.displayInPercent} onIonChange={handleToggleInputChange}/>
           </IonItem>   
           <IonItem>
-            <IonSegment value={pricePeriod} onIonChange={e => { console.log('price period selected', e.detail.value); setFundPriceQuery({...fundPriceQuery, timePeriod: e.detail.value }); setPricePeriod(p => e.detail.value!)}}>
+            <IonSegment value={chartTabForm.timePeriod} onIonChange={timePeriodSelected}>
                <IonSegmentButton value="D">
                <IonLabel>Daily</IonLabel>
                </IonSegmentButton>
@@ -293,15 +395,8 @@ const ChartTab: React.FC = () => {
         </IonList>
         </IonCard>
         <IonCard>
-            <ChartComponent type="line" labels={chartLabels} datasets={chartDatasets} /> 
+            <ChartComponent type="line" labels={chartTabForm.chartLabels!} datasets={chartTabForm.chartDatasets!} /> 
         </IonCard>
-
-        {/* Overlay to show while data fetching */}
-        <IonLoading
-        isOpen={showLoading}
-        onDidDismiss={() => setShowLoading(false)}
-        message={'Loading...'}
-        />
 
       </IonContent>
     </IonPage>
