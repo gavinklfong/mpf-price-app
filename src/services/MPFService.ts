@@ -24,7 +24,6 @@ export interface MPFFund {
     fund: string;
 }
 
-const MPF_URL1 = "https://aifobzeuf2.execute-api.us-east-2.amazonaws.com/dev/mpf/HSBC/schemes/SuperTrust Plus/funds/North American Equity Fund/price?startDate=20190101&endDate=20200115&timePeriod=M";
 const MPF_BASE_URL = "https://aifobzeuf2.execute-api.us-east-2.amazonaws.com/dev/mpf/";
 
 const API_KEY = "Whalebig27Whalebig27";
@@ -44,7 +43,7 @@ export class MPFService {
 
     getFundPrices(query: MPFFundPriceQuery): Promise<MPFFundPrice[]> {
 
-        console.log("sending request : " + encodeURI(MPF_BASE_URL));
+        console.debug("sending request : " + encodeURI(MPF_BASE_URL));
 
         let urlPathArray = new Array<String>()
         urlPathArray.push(query.trustee);
@@ -61,7 +60,7 @@ export class MPFService {
 
           let completedUrl = MPF_BASE_URL + urlPath;
           
-          console.log("completedUrl : " + completedUrl);
+          console.debug("completedUrl : " + completedUrl);
 
           return axios.get(encodeURI(completedUrl), requestOptions)
             .then((response: any)  => { 
@@ -72,7 +71,7 @@ export class MPFService {
     }
 
     getTrustees(): Promise<string[]> {
-        console.log("getTrustee()");
+        console.debug("getTrustee()");
 
         let requestOptions: AxiosRequestConfig = this.prepareRequestConfig({});
 
@@ -85,8 +84,8 @@ export class MPFService {
 
     getTrustee(trustee: string): Promise<MPFFund[]> {
 
-        console.log("getTrustee()");
-        console.log("trustee: " + trustee);
+        console.debug("getTrustee()");
+        console.debug("trustee: " + trustee);
 
         let urlPathArray = new Array<string>()
         urlPathArray.push(trustee);
@@ -103,7 +102,7 @@ export class MPFService {
     }
 
     getFunds(trustee: string, scheme: string): Promise<MPFFund[]> {
-        console.log("trustee: " + trustee + ", scheme: " + scheme);
+        console.debug("trustee: " + trustee + ", scheme: " + scheme);
 
         let urlPathArray = new Array<String>()
         urlPathArray.push(trustee);

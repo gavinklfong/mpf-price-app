@@ -25,9 +25,9 @@ import {
   IonSegment,
   IonSegmentButton
 } from '@ionic/react';
-import React, { useEffect, useLayoutEffect, useState, useRef} from 'react';
+import React, {useState} from 'react';
 import './ChartTab.css';
-import ChartComponent, { ChartDataPoint, ChartDataset, Props as ChartProps }  from '../components/ChartComponent';
+import ChartComponent from '../components/ChartComponent';
 import { useChartTab, ChartTabForm } from '../hooks/ChartTabHook';
 
 
@@ -45,12 +45,12 @@ const ChartTab: React.FC = () => {
       trusteeList: [], schemeList: [], fundList: []
    });
 
-  useChartTab(chartTabForm, setChartTabForm);
+  useChartTab(chartTabForm, setChartTabForm, setShowLoading);
 
 
    const handleInputChange = (e: any) => {
-      console.log(e.target.value);
-      console.log(e.target.name);
+      console.debug(e.target.value);
+      console.debug(e.target.name);
 
       const {name, value} = e.target
       if (!!value && typeof value !== "undefined" && value.length > 0) {
@@ -59,8 +59,8 @@ const ChartTab: React.FC = () => {
   }
 
   const handleNumberInputChange = (e: any) => {
-      console.log(e.target.value);
-      console.log(e.target.name);
+      console.debug(e.target.value);
+      console.debug(e.target.name);
 
       const {name, value} = e.target
       if (!!value && typeof value !== "undefined") {
@@ -70,8 +70,8 @@ const ChartTab: React.FC = () => {
    }
 
    const handleToggleInputChange = (e: any) => {
-      console.log(e.target.checked);
-      console.log(e.target.name);
+      console.debug(e.target.checked);
+      console.debug(e.target.name);
 
       const {name, checked} = e.target
       if (checked != null && typeof checked !== "undefined") {
@@ -81,8 +81,8 @@ const ChartTab: React.FC = () => {
    }
 
   const timePeriodSelected = (e: any) => {
-      console.log(e.target.value);
-      console.log(e.target.name);
+      console.debug(e.target.value);
+      console.debug(e.target.name);
 
       const {name, value} = e.target
       if (!!value && typeof value !== "undefined" && value.length > 0) {
@@ -169,8 +169,12 @@ const ChartTab: React.FC = () => {
         <IonCard>
             <ChartComponent type="line" labels={chartTabForm.chartLabels!} datasets={chartTabForm.chartDatasets!} /> 
         </IonCard>
-
       </IonContent>
+      <IonLoading
+        isOpen={showLoading}
+        onDidDismiss={() => setShowLoading(false)}
+        message={'Please wait...'}
+      />
     </IonPage>
   );
 };

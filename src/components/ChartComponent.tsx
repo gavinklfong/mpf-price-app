@@ -1,24 +1,5 @@
-import {
-    IonCard,
-    IonCardContent,
-    IonCardHeader,
-    IonCardSubtitle,
-    IonCardTitle,
-    IonContent,
-    IonHeader,
-    IonIcon,
-    IonItem,
-    IonLabel,
-    IonList,
-    IonListHeader,
-    IonPage,
-    IonTitle,
-    IonToolbar,
-    IonSelect,
-    IonSelectOption
-  } from '@ionic/react';
-  import { book, build, colorFill, grid } from 'ionicons/icons';
-  import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+
+  import React, { useEffect, useRef } from 'react';
   import Chart from 'chart.js';
 
 
@@ -29,7 +10,7 @@ import {
 
   export interface ChartDataset {
       data: Array<ChartDataPoint>;
-      label: string;
+      label?: string;
       borderColor?: string;
       fill?: boolean;
   }
@@ -44,7 +25,7 @@ import {
 
   const ChartComponent: React.FC<Props> = ( props ) => {
 
-    console.log("ChartComponent render()");
+    console.debug("ChartComponent render()");
     
     const chartRef: any = useRef();
     // const [chart, setChart] = useState();
@@ -59,11 +40,11 @@ import {
 
         // try {
         //     if (chart !== null || chart !== undefined) {
-        //         console.log("chart.destroy()");
+        //         console.debug("chart.destroy()");
         //         chart.destroy();
         //     }
         // } catch (e) {
-        //     console.log("exception occur while trying to destroy chart");
+        //     console.debug("exception occur while trying to destroy chart");
         // };
 
         try {
@@ -85,19 +66,19 @@ import {
             // setChart(newChart);
             
         } catch (e) {
-            console.log("error occured when trying format chart data");
-            // console.log(e);
+            console.debug("error occured when trying format chart data");
+            // console.debug(e);
         }
 
         return () => {
 
             try {
                 if (chart !== null || chart !== undefined) {
-                    console.log("chart.destroy()");
+                    console.debug("chart.destroy()");
                     chart.destroy();
                 }
             } catch (e) {
-                console.log("exception occur while trying to destroy chart");
+                console.debug("exception occur while trying to destroy chart");
             };
         }
 

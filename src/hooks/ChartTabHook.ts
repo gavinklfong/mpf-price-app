@@ -1,4 +1,6 @@
 import moment from 'moment';
+import { Observable, of } from 'rxjs';
+import { map, switchMap, startWith,tap } from 'rxjs/operators'
 import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import ChartComponent, { ChartDataPoint, ChartDataset, Props as ChartProps }  from '../components/ChartComponent';
 import { MPFService, MPFFundPrice, MPFFund, MPFFundPriceQuery } from '../services/MPFService';
@@ -18,157 +20,161 @@ export interface ChartTabForm {
     queryTimeRange: number,
     timePeriod: string,
     
-    fundPrices?: MPFFundPrice[],
+    fundPriceMap?: Map<string, MPFFundPrice[]>,
  
     chartDatasets?: ChartDataset[],
     chartLabels?: string[]
  }
+
 
 const randomNumber = (min:number, max:number) => Math.floor(Math.random() * (max - min + 1) + min);
 const randomByte = () => randomNumber(0, 255)
 const randomPercent = () => (randomNumber(50, 100) * 0.01).toFixed(2)
 const randomCssRgba = () => `rgba(${[randomByte(), randomByte(), randomByte(), randomPercent()].join(',')})`
 
+const stringHasValue = (value: string | undefined): boolean => (!!value && typeof value !== "undefined" && value.length > 0)
+const arrayHasValue = (value: Array<any> | undefined): boolean => (!!value && typeof value !== "undefined" && value.length > 0)
+
 const mpfService = new MPFService();
 
 
-export const useChartTab = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<SetStateAction<ChartTabForm>>) => {
-
-    // const [chartTabForm, setChartTabForm] = useState<ChartTabForm>(
-    //     {
-    //        trustee: "HSBC", scheme: "", fund: "", 
-    //        displayInPercent: true, timePeriod: "D",
-    //        queryTimeRange: 1,
-    //        chartLabels: [], chartDatasets: [],
-    //        trusteeList: [], schemeList: [], fundList: []
-    //     });
-  
+export const useChartTab = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<SetStateAction<ChartTabForm>>, setShowLoading: Dispatch<SetStateAction<boolean>>) => {
 
       // retrieve trustee list
     useEffect(() => {
-        (async() => {
-        let retrievedTrustees = await mpfService.getTrustees();
-        console.log("retrieved trustees: " + retrievedTrustees);
-        let formData: ChartTabForm = {...chartTabForm, trusteeList: retrievedTrustees};
-        setChartTabForm(formData);
 
-        }
-        )();
+        mpfService.getTrustees()
+        .then(trusteeList => {
+            console.debug("retrieved trustees: " + trusteeList);
+            let formData: ChartTabForm = {...chartTabForm, trusteeList: trusteeList};
+            setChartTabForm(formData);    
+        })
+        
     }, []);
 
     useEffect(() => {
 
-        (async () => {
-        console.log("useEffect() - trusteeSelected() - [" + chartTabForm.trustee + "]");
+        console.debug("useEffect() - trusteeSelected() - [" + chartTabForm.trustee + "]");
 
         let scheme = "";
 
-        if (!!chartTabForm.trustee && typeof chartTabForm.trustee !== "undefined" && chartTabForm.trustee.length > 0 ) {
+        if (stringHasValue(chartTabForm.trustee)) {
             // fetch trustee fund records
 
-            // await loading.present();
+            setShowLoading(true);
 
-            let fundRecords = await mpfService.getTrustee(chartTabForm.trustee);
-        
-            // set scheme dropdown list
-            let schemeSet =  new Set<string>();
-            fundRecords.forEach(item => {
-                schemeSet.add(item.scheme);
+            mpfService.getTrustee(chartTabForm.trustee)
+            .then(fundRecords => {
+
+                if (!!fundRecords && fundRecords.length > 0 ) {
+                    // set scheme dropdown list
+                    let schemeSet =  new Set<string>();
+                    fundRecords.forEach(item => {
+                        schemeSet.add(item.scheme);
+                    });
+                    let schemeList = Array.from(schemeSet);
+                
+                    // set selected scheme
+                    scheme = schemeList[0];
+
+                    setChartTabForm({...chartTabForm, fundRecords: fundRecords, schemeList: schemeList, scheme: scheme});
+                } else {
+                    setChartTabForm({...chartTabForm, fundRecords: [], schemeList: [], scheme: ""});
+                }
+            
             });
-            let schemeList = Array.from(schemeSet);
-        
-            // set selected scheme
-            if (!!schemeList && schemeList.length > 0) {
-                scheme = schemeList[0];
-            }
 
-            setChartTabForm({...chartTabForm, fundRecords: fundRecords, schemeList: schemeList, scheme: scheme});
-
-            // await loading.dismiss();
-
+            setShowLoading(false);
         }
-        })()
 
     }, [chartTabForm.trustee]);
 
     useEffect(() => {
 
-    (async () => {
-        console.log("useEffect() - schemeSelected() - [" + chartTabForm.scheme + "]");
+        console.debug("useEffect() - schemeSelected() - [" + chartTabForm.scheme + "]");
         
         let fund = "";
 
-        if (!!chartTabForm.scheme && chartTabForm.scheme.length > 0 &&
-        !!chartTabForm.fundRecords && chartTabForm.fundRecords.length > 0) {
-        chartTabForm.fundList = chartTabForm.fundRecords.filter(item => item.scheme === chartTabForm.scheme).map(item => item.fund);
-        if (!!chartTabForm.schemeList && chartTabForm.schemeList.length > 0) {
-            fund = chartTabForm.fundList[0];
+        if (stringHasValue(chartTabForm.scheme) && arrayHasValue(chartTabForm.fundRecords)) {
+            let fundList = chartTabForm.fundRecords!.filter(item => item.scheme === chartTabForm.scheme).map(item => item.fund);
+            if (arrayHasValue(chartTabForm.schemeList)) {
+                fund = fundList[0];
+                fundList.unshift("-- All Funds --");
+                setChartTabForm({...chartTabForm, fundList: fundList, fund: fund});  
+            }
         }
-
-        setChartTabForm({...chartTabForm, fund: fund});  
-        }
-
-    })()
 
     }, [chartTabForm.scheme]);
 
     useEffect(() => {
 
-    ( async () => {
+        (async() => {
+        console.debug("useEffect() - fundSelected() - [" + chartTabForm.fund + "]");
 
-        console.log("useEffect() - fundSelected() - [" + chartTabForm.fund + "]");
-
-        if (!!chartTabForm.fund && typeof chartTabForm.fund !== "undefined" && chartTabForm.fund.length > 0) {
+        if (stringHasValue(chartTabForm.fund)) {
     
-            console.log("fetching fund prices");
-            // await loading.present();
+            setShowLoading(true);
+            console.debug("fetching fund prices");
 
-            // fetch fund prices
             let fundPriceQuery: MPFFundPriceQuery = 
             {  trustee: chartTabForm.trustee, scheme: chartTabForm.scheme, fund: chartTabForm.fund,
                 startDate: +(moment().subtract(chartTabForm.queryTimeRange, "months").format("YYYYMMDD")),
                 endDate: +(moment().format("YYYYMMDD")),
                 timePeriod: chartTabForm.timePeriod }
 
-            console.log("mpfService.getFundPrices()");
-            let fundPrices = await mpfService.getFundPrices(fundPriceQuery);
+            let fundPriceMap = new Map<string, MPFFundPrice[]>();
 
-            setChartTabForm({...chartTabForm, fundPrices: fundPrices});
+            if (chartTabForm.fund === "-- All Funds --") {
 
-            // await loading.dismiss();
+                for (let i = 0; i < chartTabForm.fundList!.length; i++) {
+                    fundPriceQuery.fund = chartTabForm.fundList![i];
+                    let retrievedFundPrices = await mpfService.getFundPrices(fundPriceQuery)
+                    fundPriceMap.set(chartTabForm.fundList![i], retrievedFundPrices);
+                }
 
+                console.debug("end of fund loop");
+                setChartTabForm({...chartTabForm, fundPriceMap: fundPriceMap});
+                setShowLoading(false);
+
+            } else {
+
+                let retrievedFundPrices = await mpfService.getFundPrices(fundPriceQuery)
+                fundPriceMap.set(chartTabForm.fund, retrievedFundPrices);
+                setChartTabForm({...chartTabForm, fundPriceMap: fundPriceMap});
+                setShowLoading(false);
+            }
         }
-
-    })();
+        })();
 
     }, [chartTabForm.fund, chartTabForm.timePeriod, chartTabForm.queryTimeRange]);
 
     useEffect(() => { 
 
-    ( async () => {
-        console.log("useEffect() selected fund price change");
-        console.log("fundPrices : " + chartTabForm.fundPrices?.length)
-        console.log("displayInPercent : " + chartTabForm.displayInPercent)
+        console.debug("useEffect() selected fund price change");
+        console.debug("fundPriceMap : " + chartTabForm.fundPriceMap?.size)
+        console.debug("displayInPercent : " + chartTabForm.displayInPercent)
 
-        if (!!chartTabForm.fundPrices && chartTabForm.fundPrices.length > 0) {
+        if (!!chartTabForm.fundPriceMap && chartTabForm.fundPriceMap.size > 0) {
 
-        // await loading.present();
+            setShowLoading(true);
 
-        const [labels, datasets] = prepareChartData(chartTabForm.fund, chartTabForm.fundPrices, chartTabForm.displayInPercent);
-        setChartTabForm({...chartTabForm, chartLabels: labels, chartDatasets: datasets}); 
-
-        // await loading.dismiss();
-
+            let chartDatasets = new Array<ChartDataset>();
+            let chartXAxisLabels = new Array<string>();
+            chartTabForm.fundPriceMap.forEach( (fundPrices, fund) => {
+                const [labels, dataset] = prepareChartData2(fund, fundPrices, chartTabForm.displayInPercent);
+                chartDatasets.push(dataset);
+                chartXAxisLabels = labels;
+            });
+            setChartTabForm({...chartTabForm, chartLabels: chartXAxisLabels, chartDatasets: chartDatasets}); 
+            setShowLoading(false);
         }
 
-    })();
-
-    }, [chartTabForm.fundPrices, chartTabForm.displayInPercent]);
+    }, [chartTabForm.fundPriceMap, chartTabForm.displayInPercent]);
 
 
 
     const prepareChartData = (fund: string, prices: Array<MPFFundPrice> = [], inPercent: boolean): [Array<string>, Array<ChartDataset>] => {
-        console.log("updateChartData()");
+        console.debug("updateChartData()");
     
         let labels = Array<string>();
         let data = Array<ChartDataPoint>();
@@ -177,17 +183,17 @@ export const useChartTab = (chartTabForm: ChartTabForm, setChartTabForm: Dispatc
     
             let initialPrice = prices[0].price;
             prices.forEach((item: MPFFundPrice) => {
-            let dateMoment = moment(item.date, "YYYYMMDD");
-            let dateString = dateMoment.format("YYYY-MM-DD");
-            
-            labels.push(dateString);
-    
-            if (inPercent) {
-                let priceInPercent = ((item.price - initialPrice) / initialPrice) * 100;
-                data.push({x: dateString, y: priceInPercent});
-            } else {
+                let dateMoment = moment(item.date, "YYYYMMDD");
+                let dateString = dateMoment.format("YYYY-MM-DD");
+                
+                labels.push(dateString);
+        
+                if (inPercent) {
+                    let priceInPercent = ((item.price - initialPrice) / initialPrice) * 100;
+                    data.push({x: dateString, y: priceInPercent});
+                } else {
                     data.push({x: dateString, y: item.price});
-            }
+                }
             });
         }
     
@@ -204,6 +210,40 @@ export const useChartTab = (chartTabForm: ChartTabForm, setChartTabForm: Dispatc
         return [labels, datasets];
     }
 
+
+    const prepareChartData2 = (fund: string, prices: Array<MPFFundPrice> = [], inPercent: boolean): [Array<string>, ChartDataset] => {
+        console.debug("updateChartData()");
+    
+        let labels = Array<string>();
+        let data = Array<ChartDataPoint>();
+    
+        if (prices && prices.length > 0) {
+    
+            let initialPrice = prices[0].price;
+            prices.forEach((item: MPFFundPrice) => {
+                let dateMoment = moment(item.date, "YYYYMMDD");
+                let dateString = dateMoment.format("YYYY-MM-DD");
+                
+                labels.push(dateString);
+        
+                if (inPercent) {
+                    let priceInPercent = ((item.price - initialPrice) / initialPrice) * 100;
+                    data.push({x: dateString, y: priceInPercent});
+                } else {
+                    data.push({x: dateString, y: item.price});
+                }
+            });
+        }
+
+        let dataset: ChartDataset = {
+            label: fund,
+            data: data,
+            borderColor: randomCssRgba(),
+            fill: false
+        };
+    
+        return [labels, dataset];
+    }
 
    return [chartTabForm, setChartTabForm];
 
