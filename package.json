@@ -23,6 +23,7 @@
     "ionicons": "^4.6.3",
     "observable-hooks": "^2.2.0",
     "react": "^16.12.0",
+    "react-collapsible": "^2.6.3",
     "react-dom": "^16.12.0",
     "react-router": "^5.1.2",
     "react-router-dom": "^5.1.2",

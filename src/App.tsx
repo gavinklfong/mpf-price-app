@@ -47,10 +47,10 @@ const App: React.FC = () => (
             <IonIcon icon={trendingUp} />
             <IonLabel>Chart</IonLabel>
           </IonTabButton>
-          <IonTabButton tab="analysis" href="/analysis">
+          {/* <IonTabButton tab="analysis" href="/analysis">
             <IonIcon icon={search} />
             <IonLabel>Analysis</IonLabel>
-          </IonTabButton>
+          </IonTabButton> */}
         </IonTabBar>
       </IonTabs>
     </IonReactRouter>

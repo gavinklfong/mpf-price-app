@@ -29,7 +29,9 @@ import React, {useState} from 'react';
 import './ChartTab.css';
 import ChartComponent from '../components/ChartComponent';
 import { useChartTab, ChartTabForm } from '../hooks/ChartTabHook';
+import Collapsible from 'react-collapsible';
 
+// import './base/_Collapsible.scss';
 
 const ChartTab: React.FC = () => {
 
@@ -99,6 +101,7 @@ const ChartTab: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent>
+      <Collapsible trigger="MPF Fund Selection" open={true}>
         <IonCard>
         <IonList>
           <IonItem>
@@ -166,6 +169,7 @@ const ChartTab: React.FC = () => {
           </IonItem>     
         </IonList>
         </IonCard>
+        </Collapsible>
         <IonCard>
             <ChartComponent type="line" labels={chartTabForm.chartLabels!} datasets={chartTabForm.chartDatasets!} /> 
         </IonCard>

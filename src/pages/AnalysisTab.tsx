@@ -1,7 +1,8 @@
 import React, {useEffect} from 'react';
 import { IonContent, IonHeader, IonItem, IonLabel, IonList, IonPage, IonTitle, IonToolbar } from '@ionic/react';
-import axios, {AxiosRequestConfig} from 'axios';
-import { MPFService, MPFFundPrice } from '../services/MPFService';
+import Collapsible from 'react-collapsible';
+import './AnalysisTab.css';
+
 
 const AnalysisTab: React.FC = () => {
   
@@ -13,13 +14,10 @@ const AnalysisTab: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent>
-        <IonList>
-          <IonItem routerLink="/tab2/details">
-            <IonLabel>
-              <h2>Go to detail</h2>
-            </IonLabel>
-          </IonItem>
-        </IonList>
+        <Collapsible trigger="Start here">
+          <p>This is the collapsible content. It can be any element or React component you like.</p>
+          <p>It can even be another Collapsible component. Check out the next section!</p>
+        </Collapsible>
       </IonContent>
     </IonPage>
   );
