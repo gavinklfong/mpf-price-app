@@ -3,7 +3,7 @@ import { Observable, of } from 'rxjs';
 import { map, switchMap, startWith,tap } from 'rxjs/operators'
 import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import ChartComponent, { ChartDataPoint, ChartDataset, Props as ChartProps }  from '../components/ChartComponent';
-import { MPFService, MPFFundPrice, MPFFund, MPFFundPriceQuery } from '../services/MPFService';
+import { MPFService, MPFFundPrice, MPFFund, FundPrice, MPFFundPriceQuery } from '../services/MPFService';
 
 export interface ChartTabForm {
     trusteeList?: string[],
@@ -20,7 +20,7 @@ export interface ChartTabForm {
     queryTimeRange: number,
     timePeriod: string,
     
-    fundPriceMap?: Map<string, MPFFundPrice[]>,
+    fundPriceMap?: Map<MPFFund, MPFFundPrice>,
  
     chartDatasets?: ChartDataset[],
     chartLabels?: string[]
@@ -116,33 +116,29 @@ export const useChartTab = (chartTabForm: ChartTabForm, setChartTabForm: Dispatc
             setShowLoading(true);
             console.debug("fetching fund prices");
 
-            let fundPriceQuery: MPFFundPriceQuery = 
-            {  trustee: chartTabForm.trustee, scheme: chartTabForm.scheme, fund: chartTabForm.fund,
+            let queryFund: MPFFund = {
+                trustee: chartTabForm.trustee,
+                scheme: chartTabForm.scheme,
+                fund: chartTabForm.fund
+            }
+
+            let fundPriceQuery: MPFFundPriceQuery = {
                 startDate: +(moment().subtract(chartTabForm.queryTimeRange, "months").format("YYYYMMDD")),
                 endDate: +(moment().format("YYYYMMDD")),
-                timePeriod: chartTabForm.timePeriod }
-
-            let fundPriceMap = new Map<string, MPFFundPrice[]>();
-
-            if (chartTabForm.fund === "-- All Funds --") {
-
-                for (let i = 0; i < chartTabForm.fundList!.length; i++) {
-                    fundPriceQuery.fund = chartTabForm.fundList![i];
-                    let retrievedFundPrices = await mpfService.getFundPrices(fundPriceQuery)
-                    fundPriceMap.set(chartTabForm.fundList![i], retrievedFundPrices);
-                }
-
-                console.debug("end of fund loop");
-                setChartTabForm({...chartTabForm, fundPriceMap: fundPriceMap});
-                setShowLoading(false);
-
-            } else {
-
-                let retrievedFundPrices = await mpfService.getFundPrices(fundPriceQuery)
-                fundPriceMap.set(chartTabForm.fund, retrievedFundPrices);
-                setChartTabForm({...chartTabForm, fundPriceMap: fundPriceMap});
-                setShowLoading(false);
+                timePeriod: chartTabForm.timePeriod,
+                funds: [queryFund]
             }
+
+            let fundPriceMap = new Map<MPFFund, MPFFundPrice>();
+
+            let retrievedFundPrices = await mpfService.getFundPrices(fundPriceQuery);
+            retrievedFundPrices.forEach(item => {
+                fundPriceMap.set(queryFund, item);
+            });
+
+            setChartTabForm({...chartTabForm, fundPriceMap: fundPriceMap});
+            setShowLoading(false);
+            
         }
         })();
 
@@ -156,12 +152,14 @@ export const useChartTab = (chartTabForm: ChartTabForm, setChartTabForm: Dispatc
 
         if (!!chartTabForm.fundPriceMap && chartTabForm.fundPriceMap.size > 0) {
 
+            console.debug(chartTabForm.fundPriceMap);
+
             setShowLoading(true);
 
             let chartDatasets = new Array<ChartDataset>();
             let chartXAxisLabels = new Array<string>();
-            chartTabForm.fundPriceMap.forEach( (fundPrices, fund) => {
-                const [labels, dataset] = prepareChartData2(fund, fundPrices, chartTabForm.displayInPercent);
+            chartTabForm.fundPriceMap.forEach( (fundPrice, fund) => {
+                const [labels, dataset] = prepareChartData2(fund, fundPrice.prices, chartTabForm.displayInPercent);
                 chartDatasets.push(dataset);
                 chartXAxisLabels = labels;
             });
@@ -173,46 +171,46 @@ export const useChartTab = (chartTabForm: ChartTabForm, setChartTabForm: Dispatc
 
 
 
-    const prepareChartData = (fund: string, prices: Array<MPFFundPrice> = [], inPercent: boolean): [Array<string>, Array<ChartDataset>] => {
-        console.debug("updateChartData()");
+    // const prepareChartData = (fund: string, prices: Array<MPFFundPrice> = [], inPercent: boolean): [Array<string>, Array<ChartDataset>] => {
+    //     console.debug("updateChartData()");
     
-        let labels = Array<string>();
-        let data = Array<ChartDataPoint>();
+    //     let labels = Array<string>();
+    //     let data = Array<ChartDataPoint>();
     
-        if (prices && prices.length > 0) {
+    //     if (prices && prices.length > 0) {
     
-            let initialPrice = prices[0].price;
-            prices.forEach((item: MPFFundPrice) => {
-                let dateMoment = moment(item.date, "YYYYMMDD");
-                let dateString = dateMoment.format("YYYY-MM-DD");
+    //         let initialPrice = prices[0].price;
+    //         prices.forEach((item: MPFFundPrice) => {
+    //             let dateMoment = moment(item.date, "YYYYMMDD");
+    //             let dateString = dateMoment.format("YYYY-MM-DD");
                 
-                labels.push(dateString);
+    //             labels.push(dateString);
         
-                if (inPercent) {
-                    let priceInPercent = ((item.price - initialPrice) / initialPrice) * 100;
-                    data.push({x: dateString, y: priceInPercent});
-                } else {
-                    data.push({x: dateString, y: item.price});
-                }
-            });
-        }
+    //             if (inPercent) {
+    //                 let priceInPercent = ((item.price - initialPrice) / initialPrice) * 100;
+    //                 data.push({x: dateString, y: priceInPercent});
+    //             } else {
+    //                 data.push({x: dateString, y: item.price});
+    //             }
+    //         });
+    //     }
     
-        let datasets = Array<ChartDataset>();
-        datasets.push(
-        {
-            label: fund,
-            data: data,
-            borderColor: randomCssRgba(),
-            fill: false
-        }
-        );
+    //     let datasets = Array<ChartDataset>();
+    //     datasets.push(
+    //     {
+    //         label: fund,
+    //         data: data,
+    //         borderColor: randomCssRgba(),
+    //         fill: false
+    //     }
+    //     );
     
-        return [labels, datasets];
-    }
+    //     return [labels, datasets];
+    // }
 
 
-    const prepareChartData2 = (fund: string, prices: Array<MPFFundPrice> = [], inPercent: boolean): [Array<string>, ChartDataset] => {
-        console.debug("updateChartData()");
+    const prepareChartData2 = (fund: MPFFund, prices: FundPrice[], inPercent: boolean): [Array<string>, ChartDataset] => {
+        console.debug("prepareChartData()");
     
         let labels = Array<string>();
         let data = Array<ChartDataPoint>();
@@ -220,7 +218,7 @@ export const useChartTab = (chartTabForm: ChartTabForm, setChartTabForm: Dispatc
         if (prices && prices.length > 0) {
     
             let initialPrice = prices[0].price;
-            prices.forEach((item: MPFFundPrice) => {
+            prices.forEach((item: FundPrice) => {
                 let dateMoment = moment(item.date, "YYYYMMDD");
                 let dateString = dateMoment.format("YYYY-MM-DD");
                 
@@ -236,7 +234,7 @@ export const useChartTab = (chartTabForm: ChartTabForm, setChartTabForm: Dispatc
         }
 
         let dataset: ChartDataset = {
-            label: fund,
+            label: fund.fund,
             data: data,
             borderColor: randomCssRgba(),
             fill: false
