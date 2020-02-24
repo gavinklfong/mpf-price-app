@@ -30,6 +30,8 @@ import './ChartTab.css';
 import ChartComponent from '../components/ChartComponent';
 import { useChartTab, ChartTabForm } from '../hooks/ChartTabHook';
 import Collapsible from 'react-collapsible';
+import { MPFFund } from '../services/MPFService';
+
 
 // import './base/_Collapsible.scss';
 
@@ -37,10 +39,11 @@ const ChartTab: React.FC = () => {
 
  
   const [showLoading, setShowLoading] = useState(false);
+  const [chartHeight, setChartHeight] = useState("50vh");
 
   const [chartTabForm, setChartTabForm] = useState<ChartTabForm>(
    {
-      trustee: "", scheme: "", fund: "", 
+      trustee: "", scheme: "", selectedFundText: "", 
       displayInPercent: true, timePeriod: "D",
       queryTimeRange: 1,
       chartLabels: [], chartDatasets: [],
@@ -50,8 +53,27 @@ const ChartTab: React.FC = () => {
   useChartTab(chartTabForm, setChartTabForm, setShowLoading);
 
 
+  const handleFundSelectionChange = (e: any) => {
+      console.debug(e);
+      console.debug(e.target.name);
+
+      const values: Array<any> = e.detail.value
+      if (!!values && typeof values !== "undefined" && values.length > 0) {
+
+        let selectedFundText = "Multiple Funds";
+        if (values.length == 1) {
+            selectedFundText = values[0];
+        } else if (values.length > 1) {
+            selectedFundText = "Multiple Funds";
+        }
+        
+         setChartTabForm({...chartTabForm, funds: values, selectedFundText: selectedFundText});
+      }
+  
+  }
+
    const handleInputChange = (e: any) => {
-      console.debug(e.target.value);
+      console.debug(e);
       console.debug(e.target.name);
 
       const {name, value} = e.target
@@ -92,6 +114,13 @@ const ChartTab: React.FC = () => {
       }   
   }
    
+  const accordinOnOpen = () => {
+    setChartHeight("50vh");
+  }
+
+  const accordinOnClose = () => {
+    setChartHeight("75vh");
+  }
 
   return (
     <IonPage>
@@ -101,7 +130,7 @@ const ChartTab: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent>
-      <Collapsible trigger="MPF Fund Selection" open={true}>
+      <Collapsible trigger="MPF Fund Selection" open={true} onOpen={accordinOnOpen} onClose={accordinOnClose}>
         <IonCard>
         <IonList>
           <IonItem>
@@ -133,10 +162,10 @@ const ChartTab: React.FC = () => {
           </IonItem>
           <IonItem>
             <IonLabel>Fund</IonLabel>
-            <IonSelect interface="action-sheet" placeholder="-- All Funds --" 
+            <IonSelect interface="action-sheet" multiple={true} placeholder="-- Select Funds --" 
             name="fund"
-            selectedText={chartTabForm.fund} value={chartTabForm.fund} 
-            onIonChange={handleInputChange} >
+            selectedText={chartTabForm.selectedFundText} value={chartTabForm.funds} 
+            onIonChange={handleFundSelectionChange} >
               { chartTabForm.fundList!.map((item: string) => {
                 return (
                   <IonSelectOption key={item} value={item}>{item}</IonSelectOption>
@@ -151,6 +180,8 @@ const ChartTab: React.FC = () => {
                 <IonLabel slot="start">1 Month</IonLabel>
                 <IonLabel slot="end">12 Months</IonLabel>
             </IonRange>
+            </IonItem>
+            <IonItem>
             <IonLabel>Percent</IonLabel>
             <IonToggle name="displayInPercent" checked={chartTabForm.displayInPercent} onIonChange={handleToggleInputChange}/>
           </IonItem>   
@@ -171,7 +202,7 @@ const ChartTab: React.FC = () => {
         </IonCard>
         </Collapsible>
         <IonCard>
-            <ChartComponent type="line" labels={chartTabForm.chartLabels!} datasets={chartTabForm.chartDatasets!} /> 
+            <ChartComponent type="line" height={chartHeight} labels={chartTabForm.chartLabels!} datasets={chartTabForm.chartDatasets!} /> 
         </IonCard>
       </IonContent>
       <IonLoading

@@ -155,7 +155,7 @@ export class MPFService {
             let fundPrice = {   
                 trustee: item.trustee, 
                 scheme: item.scheme, 
-                fund: item.fundName, 
+                fund: item.fund, 
                 prices: new Array<FundPrice>()
             };
 

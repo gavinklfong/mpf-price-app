@@ -12,7 +12,8 @@ export interface ChartTabForm {
  
     trustee: string,
     scheme: string,
-    fund: string,
+    funds?: string[],
+    selectedFundText: string,
  
     fundRecords?: MPFFund[]
  
@@ -93,14 +94,11 @@ export const useChartTab = (chartTabForm: ChartTabForm, setChartTabForm: Dispatc
 
         console.debug("useEffect() - schemeSelected() - [" + chartTabForm.scheme + "]");
         
-        let fund = "";
-
         if (stringHasValue(chartTabForm.scheme) && arrayHasValue(chartTabForm.fundRecords)) {
             let fundList = chartTabForm.fundRecords!.filter(item => item.scheme === chartTabForm.scheme).map(item => item.fund);
             if (arrayHasValue(chartTabForm.schemeList)) {
-                fund = fundList[0];
-                fundList.unshift("-- All Funds --");
-                setChartTabForm({...chartTabForm, fundList: fundList, fund: fund});  
+                let fund = [fundList[0]];
+                setChartTabForm({...chartTabForm, fundList: fundList, funds: fund, selectedFundText: fundList[0]});  
             }
         }
 
@@ -109,31 +107,32 @@ export const useChartTab = (chartTabForm: ChartTabForm, setChartTabForm: Dispatc
     useEffect(() => {
 
         (async() => {
-        console.debug("useEffect() - fundSelected() - [" + chartTabForm.fund + "]");
+        console.debug("useEffect() - fundSelected() - [" + chartTabForm.funds + "]");
 
-        if (stringHasValue(chartTabForm.fund)) {
+        if (chartTabForm.funds && chartTabForm.funds.length > 0) {
     
             setShowLoading(true);
             console.debug("fetching fund prices");
 
-            let queryFund: MPFFund = {
-                trustee: chartTabForm.trustee,
-                scheme: chartTabForm.scheme,
-                fund: chartTabForm.fund
+            let queryFunds = new Array<MPFFund>();
+            for (let i = 0; i < chartTabForm.funds.length; i++) {
+                queryFunds.push({trustee: chartTabForm.trustee, scheme: chartTabForm.scheme, fund: chartTabForm.funds[i]})
             }
 
             let fundPriceQuery: MPFFundPriceQuery = {
                 startDate: +(moment().subtract(chartTabForm.queryTimeRange, "months").format("YYYYMMDD")),
                 endDate: +(moment().format("YYYYMMDD")),
                 timePeriod: chartTabForm.timePeriod,
-                funds: [queryFund]
+                funds: queryFunds
             }
 
             let fundPriceMap = new Map<MPFFund, MPFFundPrice>();
 
             let retrievedFundPrices = await mpfService.getFundPrices(fundPriceQuery);
+
             retrievedFundPrices.forEach(item => {
-                fundPriceMap.set(queryFund, item);
+                console.debug("retrieved fund price item: " + JSON.stringify(item));
+                fundPriceMap.set({trustee: item.trustee, scheme: item.scheme, fund: item.fund}, item);
             });
 
             setChartTabForm({...chartTabForm, fundPriceMap: fundPriceMap});
@@ -142,7 +141,7 @@ export const useChartTab = (chartTabForm: ChartTabForm, setChartTabForm: Dispatc
         }
         })();
 
-    }, [chartTabForm.fund, chartTabForm.timePeriod, chartTabForm.queryTimeRange]);
+    }, [chartTabForm.funds, chartTabForm.timePeriod, chartTabForm.queryTimeRange]);
 
     useEffect(() => { 
 

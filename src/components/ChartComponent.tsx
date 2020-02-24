@@ -19,6 +19,7 @@
     type: string,
     labels: Array<string>,
     datasets: Array<ChartDataset>
+    height: string
   }
 
   let chart: any = null;
@@ -86,7 +87,7 @@
 
 
     return (
-        <div style={{position: "relative", height:"50vh" }} >
+        <div style={{position: "relative", height:props.height}} >
             <canvas
                 id="myChart"
                 ref={chartRef}
