@@ -20,6 +20,7 @@
     "axios": "^0.19.2",
     "canvas": "^2.6.1",
     "chart.js": "^2.9.3",
+    "firebase": "^7.14.0",
     "ionicons": "^4.6.3",
     "observable-hooks": "^2.2.0",
     "react": "^16.12.0",

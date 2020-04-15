@@ -13,6 +13,8 @@ import { IonReactRouter } from '@ionic/react-router';
 import { apps, flash, send, trendingUp, search } from 'ionicons/icons';
 import ChartTab from './pages/ChartTab';
 import AnalysisTab from './pages/AnalysisTab';
+import HomeTab from './pages/HomeTab';
+import { AppContextProvider, serviceContext}  from './AppContext';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -33,19 +35,28 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 
-const App: React.FC = () => (
+const App: React.FC = () => {
+  
+  return (
+
+  <AppContextProvider value={serviceContext}>
   <IonApp>
     <IonReactRouter>
       <IonTabs>
         <IonRouterOutlet>
           <Route path="/chart" component={ChartTab} exact={true} />
           <Route path="/analysis" component={AnalysisTab} exact={true} />
-          <Route path="/" render={() => <Redirect to="/chart" />} exact={true} />
+          <Route path="/home" component={HomeTab} exact={true} />
+          <Route path="/" render={() => <Redirect to="/home" />} exact={true} />
         </IonRouterOutlet>
         <IonTabBar slot="bottom">
           <IonTabButton tab="chart" href="/chart">
             <IonIcon icon={trendingUp} />
             <IonLabel>Chart</IonLabel>
+          </IonTabButton>
+          <IonTabButton tab="home" href="/home">
+            <IonIcon icon={trendingUp} />
+            <IonLabel>Home</IonLabel>
           </IonTabButton>
           {/* <IonTabButton tab="analysis" href="/analysis">
             <IonIcon icon={search} />
@@ -55,6 +66,8 @@ const App: React.FC = () => (
       </IonTabs>
     </IonReactRouter>
   </IonApp>
-);
+  </AppContextProvider>
+)
+};
 
 export default App;

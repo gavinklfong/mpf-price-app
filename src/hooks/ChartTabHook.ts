@@ -62,10 +62,11 @@ export const useChartTab = (chartTabForm: ChartTabForm, setChartTabForm: Dispatc
         if (stringHasValue(chartTabForm.trustee)) {
             // fetch trustee fund records
 
-            setShowLoading(true);
 
             mpfService.getTrustee(chartTabForm.trustee)
             .then(fundRecords => {
+                setShowLoading(true);
+
 
                 if (!!fundRecords && fundRecords.length > 0 ) {
                     // set scheme dropdown list
@@ -82,10 +83,11 @@ export const useChartTab = (chartTabForm: ChartTabForm, setChartTabForm: Dispatc
                 } else {
                     setChartTabForm({...chartTabForm, fundRecords: [], schemeList: [], scheme: ""});
                 }
+
+                setShowLoading(false);
             
             });
 
-            setShowLoading(false);
         }
 
     }, [chartTabForm.trustee]);
