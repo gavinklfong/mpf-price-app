@@ -39,7 +39,7 @@ const arrayHasValue = (value: Array<any> | undefined): boolean => (!!value && ty
 const mpfService = new MPFService();
 
 
-export const useChartTab = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<SetStateAction<ChartTabForm>>, setShowLoading: Dispatch<SetStateAction<boolean>>) => {
+export const useChart = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<SetStateAction<ChartTabForm>>, setShowLoading: Dispatch<SetStateAction<boolean>>) => {
 
       // retrieve trustee list
     useEffect(() => {

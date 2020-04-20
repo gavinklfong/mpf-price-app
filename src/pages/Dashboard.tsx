@@ -1,16 +1,19 @@
 import React, {useEffect} from 'react';
-import { IonContent, IonHeader, IonItem, IonLabel, IonList, IonPage, IonTitle, IonToolbar } from '@ionic/react';
+import { IonContent, IonHeader, IonItem, IonLabel, IonList, IonPage, IonTitle, IonToolbar, IonButtons, IonMenuButton} from '@ionic/react';
 import Collapsible from 'react-collapsible';
-import './AnalysisTab.css';
+import './Dashboard.css';
 
 
-const AnalysisTab: React.FC = () => {
+const Dashboard: React.FC = () => {
   
   return (
     <IonPage>
       <IonHeader>
-        <IonToolbar>
-          <IonTitle>Tab Two</IonTitle>
+      <IonToolbar>
+          <IonButtons slot="start">
+            <IonMenuButton />
+          </IonButtons>
+          <IonTitle>Dashboard</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent>
@@ -23,4 +26,4 @@ const AnalysisTab: React.FC = () => {
   );
 };
 
-export default AnalysisTab;
+export default Dashboard;

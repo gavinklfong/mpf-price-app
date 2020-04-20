@@ -3,10 +3,10 @@ import { IonContent, IonHeader, IonItem, IonLabel, IonList, IonPage, IonTitle, I
 import Collapsible from 'react-collapsible';
 import AppContext from '../AppContext';
 
-import './HomeTab.css';
+import './Home.css';
 
 
-const HomeTab: React.FC = () => {
+const Home: React.FC = () => {
 
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
@@ -41,6 +41,14 @@ const HomeTab: React.FC = () => {
         if (user) {
           // User is signed in.
           console.log("login user info: " + user.uid + ", " + user.email);
+
+          user.getIdToken(true).then((idToken) => {
+              console.log("user id token: " + idToken);
+          }).catch((error) => {
+              console.error("Fail to generate id token");
+          })
+
+
         } 
       }
     );
@@ -72,4 +80,4 @@ const HomeTab: React.FC = () => {
   );
 };
 
-export default HomeTab;
+export default Home;

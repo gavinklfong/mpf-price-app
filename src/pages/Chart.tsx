@@ -1,17 +1,11 @@
 import moment from 'moment';
 import {
   IonCard,
-  IonCardContent,
-  IonCardHeader,
-  IonCardSubtitle,
-  IonCardTitle,
   IonContent,
   IonHeader,
-  IonIcon,
   IonItem,
   IonLabel,
   IonList,
-  IonListHeader,
   IonPage,
   IonTitle,
   IonToolbar,
@@ -20,22 +14,22 @@ import {
   IonLoading,
   IonRange,
   IonToggle,
-  IonNote,
-  IonSpinner,
+  IonButtons,
   IonSegment,
-  IonSegmentButton
+  IonSegmentButton,
+  IonMenuButton
 } from '@ionic/react';
 import React, {useState} from 'react';
-import './ChartTab.css';
+import './Chart.css';
 import ChartComponent from '../components/ChartComponent';
-import { useChartTab, ChartTabForm } from '../hooks/ChartTabHook';
+import { useChart, ChartTabForm } from '../hooks/ChartHook';
 import Collapsible from 'react-collapsible';
 import { MPFFund } from '../services/MPFService';
 
 
 // import './base/_Collapsible.scss';
 
-const ChartTab: React.FC = () => {
+const Chart: React.FC = () => {
 
  
   const [showLoading, setShowLoading] = useState(false);
@@ -50,7 +44,7 @@ const ChartTab: React.FC = () => {
       trusteeList: [], schemeList: [], fundList: []
    });
 
-  useChartTab(chartTabForm, setChartTabForm, setShowLoading);
+  useChart(chartTabForm, setChartTabForm, setShowLoading);
 
 
   const handleFundSelectionChange = (e: any) => {
@@ -125,7 +119,10 @@ const ChartTab: React.FC = () => {
   return (
     <IonPage>
       <IonHeader>
-        <IonToolbar>
+      <IonToolbar>
+          <IonButtons slot="start">
+            <IonMenuButton />
+          </IonButtons>
           <IonTitle>Chart</IonTitle>
         </IonToolbar>
       </IonHeader>
@@ -214,4 +211,4 @@ const ChartTab: React.FC = () => {
   );
 };
 
-export default ChartTab;
+export default Chart;
