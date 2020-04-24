@@ -1,15 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Redirect, Route } from 'react-router-dom';
 import { IonApp, IonRouterOutlet, IonSplitPane } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { apps, flash, send, trendingUp, search } from 'ionicons/icons';
 
-import { AppContextProvider, serviceContext}  from './AppContext';
+import { LoginSessionContextProvider, ServiceContextProvider, initializeServiceContext, initializeLoginSessionContext, LoginSessionContextModel}  from './AppContext';
 
 import Menu from './components/Menu';
 import Dashboard  from './pages/Dashboard';
 import Chart from './pages/Chart';
-import Home from './pages/Home';
+import Login from './pages/Login';
 
 
 
@@ -32,10 +32,16 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 
+
 const App: React.FC = () => {
 
+  const serviceContextValue = initializeServiceContext();
+  const [loginSession, updateLoginSession]= useState<LoginSessionContextModel>(initializeLoginSessionContext(serviceContextValue));
+  const loginSessionContextValue = {loginSession, updateLoginSession};
+  
   return (
-    <AppContextProvider value={serviceContext}>
+    <ServiceContextProvider value={serviceContextValue}>
+      <LoginSessionContextProvider value={loginSessionContextValue}>
       <IonApp>
         <IonReactRouter>
           <IonSplitPane contentId="main">
@@ -43,12 +49,14 @@ const App: React.FC = () => {
             <IonRouterOutlet id="main">
               <Route path="/page/Dashboard" component={Dashboard} exact />
               <Route path="/page/Chart" component={Chart} exact />
+              <Route path="/page/Login" component={Login} exact />
               <Redirect from="/" to="/page/Dashboard" exact />
             </IonRouterOutlet>
           </IonSplitPane>
         </IonReactRouter>
       </IonApp>
-    </AppContextProvider>
+      </LoginSessionContextProvider>
+    </ServiceContextProvider>
   );
 };
 

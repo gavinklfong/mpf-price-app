@@ -24,6 +24,7 @@
     "ionicons": "^5.0.0",
     "observable-hooks": "^2.2.0",
     "react": "^16.13.0",
+    "react-avatar": "^3.9.2",
     "react-collapsible": "^2.6.3",
     "react-dom": "^16.13.0",
     "react-router": "^5.1.2",

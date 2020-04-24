@@ -8,12 +8,19 @@ import {
   IonMenu,
   IonMenuToggle,
   IonNote,
+  IonAvatar,
+  IonChip,
+  IonButton
 } from '@ionic/react';
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { archiveOutline, archiveSharp, bookmarkOutline, heartOutline, heartSharp, mailOutline, mailSharp, paperPlaneOutline, paperPlaneSharp, trashOutline, trashSharp, warningOutline, warningSharp } from 'ionicons/icons';
+import Avatar from 'react-avatar';
 import './Menu.css';
+
+import { LoginSessionContext } from '../AppContext';
+
 
 interface AppPage {
   url: string;
@@ -42,12 +49,23 @@ const labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
 const Menu: React.FC = () => {
   const location = useLocation();
 
+  const {loginSession, updateLoginSession} = useContext(LoginSessionContext);
+  const userEmail = loginSession.loginId
+
+
   return (
     <IonMenu contentId="main" type="overlay">
       <IonContent>
         <IonList id="inbox-list">
-          <IonListHeader>Profile</IonListHeader>
-          <IonNote>hi@ionicframework.com</IonNote>
+          {/* <IonItem> */}
+          <Avatar name={userEmail} round={true} size="50" />
+          {/* </IonItem> */}
+          {/* <IonListHeader>Profile</IonListHeader> */}
+          { userEmail 
+            ? <IonNote>{userEmail}</IonNote>
+            : <IonButton size="small" href="/page/Login">Login</IonButton>
+
+          }
           {appPages.map((appPage, index) => {
             return (
               <IonMenuToggle key={index} autoHide={false}>
