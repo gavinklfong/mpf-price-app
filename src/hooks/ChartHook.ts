@@ -4,6 +4,7 @@ import { map, switchMap, startWith,tap } from 'rxjs/operators'
 import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import ChartComponent, { ChartDataPoint, ChartDataset, Props as ChartProps }  from '../components/ChartComponent';
 import { MPFService, MPFFundPrice, MPFFund, FundPrice, MPFFundPriceQuery } from '../services/MPFService';
+import { useService } from './ServiceHook';
 
 export interface ChartTabForm {
     trusteeList?: string[],
@@ -36,10 +37,10 @@ const randomCssRgba = () => `rgba(${[randomByte(), randomByte(), randomByte(), r
 const stringHasValue = (value: string | undefined): boolean => (!!value && typeof value !== "undefined" && value.length > 0)
 const arrayHasValue = (value: Array<any> | undefined): boolean => (!!value && typeof value !== "undefined" && value.length > 0)
 
-const mpfService = new MPFService();
-
 
 export const useChart = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<SetStateAction<ChartTabForm>>, setShowLoading: Dispatch<SetStateAction<boolean>>) => {
+
+    const mpfService: MPFService = useService("mpfService");
 
       // retrieve trustee list
     useEffect(() => {

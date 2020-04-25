@@ -11,6 +11,7 @@ import Dashboard  from './pages/Dashboard';
 import Chart from './pages/Chart';
 import Login from './pages/Login';
 
+import ErrorBoundary from './components/ErrorBoundary';
 
 
 /* Core CSS required for Ionic components to work properly */
@@ -42,6 +43,7 @@ const App: React.FC = () => {
   return (
     <ServiceContextProvider value={serviceContextValue}>
       <LoginSessionContextProvider value={loginSessionContextValue}>
+      <ErrorBoundary>
       <IonApp>
         <IonReactRouter>
           <IonSplitPane contentId="main">
@@ -55,6 +57,7 @@ const App: React.FC = () => {
           </IonSplitPane>
         </IonReactRouter>
       </IonApp>
+      </ErrorBoundary>
       </LoginSessionContextProvider>
     </ServiceContextProvider>
   );

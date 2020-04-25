@@ -1,5 +1,6 @@
 import React, { useState, Dispatch, SetStateAction } from 'react';
 import { AuthService } from './services/AuthService';
+import { MPFService } from './services/MPFService';
 // import * as firebase from 'firebase/app';
 
 
@@ -24,7 +25,10 @@ export const initializeServiceContext = (): ServiceContextModel => {
 
     const authService = new AuthService();
 
+    const mpfService = new MPFService(authService);
+
     serviceMap.set("authService", authService);
+    serviceMap.set("mpfService", mpfService);
 
     return {
         services: serviceMap

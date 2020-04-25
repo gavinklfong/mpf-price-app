@@ -51,5 +51,18 @@ export class AuthService {
         this.firebase.auth().onAuthStateChanged(handleAuthStateChange);
     }
 
+    async generateIdToken() {
+
+        let idToken = "";
+        try {
+            idToken = await this.firebase.auth().currentUser.getIdToken();
+        } catch (e) {
+            console.error(e);
+            throw e;
+        }
+
+        return idToken;
+    }
+
 
 }

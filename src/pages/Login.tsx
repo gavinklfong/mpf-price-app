@@ -1,4 +1,5 @@
 import React, {useEffect, useState, useContext} from 'react';
+import { useHistory } from "react-router-dom";
 import { IonLoading, IonButtons, IonMenuButton, IonContent, IonHeader, IonItem, IonLabel, IonList, IonPage, IonTitle, IonToolbar, IonInput, IonButton } from '@ionic/react';
 import Collapsible from 'react-collapsible';
 import { LoginSessionContext, ServiceContext } from '../AppContext';
@@ -14,6 +15,8 @@ interface LoginForm {
 
 const Login: React.FC = () => {
 
+
+  const history = useHistory();
   const [showLoading, setShowLoading] = useState(false);
 
   const {loginSession, updateLoginSession} = useContext(LoginSessionContext);
@@ -22,7 +25,7 @@ const Login: React.FC = () => {
   const authService: AuthService = useService("authService");
   
   let initialLoginId = loginSession.loginId;
-  const [loginForm, setLoginForm] = useState<LoginForm>({loginId: initialLoginId, password: ""});
+  const [loginForm, setLoginForm] = useState<LoginForm>({loginId: "gavin_fong@yahoo.com", password: "123456"});
 
 
   const submitForLogin = async () => {
@@ -33,6 +36,8 @@ const Login: React.FC = () => {
       let signInResult = await authService.signInWithEmailAndPassword(loginForm.loginId, loginForm.password);
       console.log(signInResult.user.email);
       updateLoginSession({loginId: signInResult.user.email});
+      history.push("/page/Chart");
+
 
     } catch (error) {
 

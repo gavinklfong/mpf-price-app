@@ -1,5 +1,6 @@
 import axios, {AxiosRequestConfig} from 'axios';
 import moment from 'moment';
+import { AuthService } from './AuthService';
 
 export interface MPFFundPriceQuery {
     startDate: number;
@@ -26,84 +27,95 @@ export interface MPFFund {
     fund: string;
 }
 
-const MPF_BASE_URL = "https://aifobzeuf2.execute-api.us-east-2.amazonaws.com/dev/mpf/";
+const MPF_BASE_URL = "https://ymfsropn9g.execute-api.us-east-2.amazonaws.com/dev/mpf/";
 
-const API_KEY = "Whalebig27Whalebig27";
+const API_KEY = "EKJRmsQhdN7PUvIY6RYJg1nhesEq95Rx41igtoFT";
+
 
 export class MPFService {
 
-    prepareRequestConfig(params: any, data: any = {}): AxiosRequestConfig {
+    private authService: AuthService;
+
+    constructor(authService: AuthService) {
+        this.authService = authService;
+    }
+
+    async prepareRequestHeaders(): Promise<any> {
+
+        const idToken = await this.authService.generateIdToken();
+
         return  {
-            headers : {
-                "x-api-key": API_KEY
-            },
+            "x-api-key": API_KEY,
+            "Authorization": "bearer " + idToken
+         }
+        
+    }
+
+
+    async prepareRequestConfig(params: any, data: any = {}): Promise<AxiosRequestConfig> {
+
+        const headers = await this.prepareRequestHeaders();
+
+        return  {
+            headers : headers,
             params: params,
             data: data
           };
     }
     
-    getFundPrices(query: MPFFundPriceQuery): Promise<MPFFundPrice[]> {
+    async getFundPrices(query: MPFFundPriceQuery): Promise<MPFFundPrice[]> {
 
         console.debug("sending request : " + encodeURI(MPF_BASE_URL));
 
-        let params: any = this.buildParams(query);
-
-        let requestOptions: AxiosRequestConfig = this.prepareRequestConfig(params, query);
+        let reqBody: any = this.buildParams(query);
+        let headers = await this.prepareRequestHeaders();
 
         let completedUrl = MPF_BASE_URL + "price";
           
         console.debug("completedUrl : " + completedUrl);
 
-        // completedUrl = "https://6pzv6l04kc.execute-api.us-east-2.amazonaws.com/dev/mpf/price"
+        try {
+            const response: any = await axios.post(encodeURI(completedUrl), reqBody, { headers: headers});
+            return this.formatFundPriceResult(response.data);
+        } catch (e) {
+            console.error(e);
+            throw e;
+        }
+    }
 
-        // requestOptions =  {
-        //     headers : {
-        //         "x-api-key": "12345678901234567890"
-        //     },
-        //     params: params,
-        //     data: query
-        //   };
+    async getTrustees(): Promise<string[]> {
+        console.debug("getTrustees()");
 
-        return axios.post(encodeURI(completedUrl), requestOptions)
-        .then((response: any)  => { 
-            console.log(response.data);
+        const requestOptions: AxiosRequestConfig = await this.prepareRequestConfig({});
+
+        try {
+            const response: any = await axios.get(encodeURI(MPF_BASE_URL), requestOptions);
             return response.data;
-        })
-        .then(res => this.formatFundPriceResult(res))
+        } catch (e) {
+            console.error(e);
+            throw e;
+        }
     }
 
-    getTrustees(): Promise<string[]> {
-        console.debug("getTrustee()");
-
-        let requestOptions: AxiosRequestConfig = this.prepareRequestConfig({});
-
-        return axios.get(encodeURI(MPF_BASE_URL), requestOptions)
-          .then((response: any)  => { 
-            //   console.log(response.data);
-              return response.data;
-          })
-    }
-
-    getTrustee(trustee: string): Promise<MPFFund[]> {
+    async getTrustee(trustee: string): Promise<MPFFund[]> {
 
         console.debug("getTrustee()");
         console.debug("trustee: " + trustee);
 
-        let urlPathArray = new Array<string>()
-        urlPathArray.push(trustee);
-        let urlPath = urlPathArray.join("/");  
-        let completedUrl = MPF_BASE_URL + urlPath;
-        let requestOptions: AxiosRequestConfig = this.prepareRequestConfig({});
+        let completedUrl = MPF_BASE_URL + trustee;
 
+        let requestOptions: AxiosRequestConfig = await this.prepareRequestConfig({});
 
-        return axios.get(encodeURI(completedUrl), requestOptions)
-          .then((response: any)  => { 
-            //   console.log(response.data);
-              return response.data;
-          })
+        try {
+            const response:any = await axios.get(encodeURI(completedUrl), requestOptions);
+            return response.data;
+        } catch (e) {
+            console.error(e);
+            throw e;
+        }
     }
 
-    getFunds(trustee: string, scheme: string): Promise<MPFFund[]> {
+    async getFunds(trustee: string, scheme: string): Promise<MPFFund[]> {
         console.debug("trustee: " + trustee + ", scheme: " + scheme);
 
         let urlPathArray = new Array<String>()
@@ -116,14 +128,15 @@ export class MPFService {
         let completedUrl = MPF_BASE_URL + urlPath;
         console.log("completedUrl : " + completedUrl);
 
-        let requestOptions: AxiosRequestConfig = this.prepareRequestConfig({});
+        let requestOptions: AxiosRequestConfig = await this.prepareRequestConfig({});
 
-        return axios.get(encodeURI(completedUrl), requestOptions)
-          .then((response: any)  => { 
-            //   console.log(response.data.Items);
-              return response.data.Items;
-          })
-          .then(res => this.formatFundListResult(res))
+        try {
+            const response:any = axios.get(encodeURI(completedUrl), requestOptions);
+            return this.formatFundListResult(response.data.Items);
+        } catch (e) {
+            console.error(e);
+            throw e;
+        }
     }
 
     buildParams(query: MPFFundPriceQuery): any {
@@ -142,6 +155,8 @@ export class MPFService {
         } else {
             params.timePeriod = "D"
         }
+
+        params.funds = query.funds;
 
         return params;
     }
