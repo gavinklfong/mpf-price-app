@@ -1,9 +1,9 @@
 import React, {useEffect, useState, useContext} from 'react';
 import { IonLoading, IonButtons, IonMenuButton, IonContent, IonHeader, IonItem, IonLabel, IonList, IonPage, IonTitle, IonToolbar, IonInput, IonButton } from '@ionic/react';
 import Collapsible from 'react-collapsible';
-import * as firebase from 'firebase/app';
-import User from 'firebase/auth';
 import { LoginSessionContext, ServiceContext } from '../AppContext';
+import { useService } from '../hooks/ServiceHook';
+import { AuthService } from '../services/AuthService';
 
 import './Login.css';
 
@@ -17,55 +17,36 @@ const Login: React.FC = () => {
   const [showLoading, setShowLoading] = useState(false);
 
   const {loginSession, updateLoginSession} = useContext(LoginSessionContext);
-  const serviceContext = useContext(ServiceContext);
   
-  const firebaseApp = serviceContext.services.firebase;
+  const firebaseApp = useService("firebase");
+  const authService: AuthService = useService("authService");
   
   let initialLoginId = loginSession.loginId;
   const [loginForm, setLoginForm] = useState<LoginForm>({loginId: initialLoginId, password: ""});
 
-  const submitForLogin = () => {
+
+  const submitForLogin = async () => {
 
     setShowLoading(true);
 
-    console.log("FirebaseApp name: " + firebaseApp.name);
+    try {
+      let signInResult = await authService.signInWithEmailAndPassword(loginForm.loginId, loginForm.password);
+      console.log(signInResult.user.email);
+      updateLoginSession({loginId: signInResult.user.email});
 
-    firebaseApp.auth().signOut().then(function() {
-      // Sign-out successful.
-      // console.log("signout first");
+    } catch (error) {
 
-      firebaseApp.auth().signInWithEmailAndPassword(loginForm.loginId, loginForm.password).then((user:any) => {
+      await authService.signOut();
+      updateLoginSession({loginId: ""});
 
-      }).catch((error:any) => {
-        // Handle Errors here.
-        let errorCode = error.code;
-        let errorMessage = error.message;
-        // ...
-        console.log("Firebase auth - errorCode = " + errorCode);
-        console.log("Firebase auth - errorMessage = " + errorMessage);
+      let errorCode = error.code;
+      let errorMessage = error.message;
+      console.log("Firebase auth - errorCode = " + errorCode);
+      console.log("Firebase auth - errorMessage = " + errorMessage);
+    } finally {
+      setShowLoading(false);
+    }
 
-      }).finally(() => {
-        setShowLoading(false);
-      });
-
-    }).catch((error:any) => {
-      // An error happened.
-    });
-
-    firebaseApp.auth().onAuthStateChanged((user:any) => {
-
-        if (user) {
-          // User is signed in.
-          console.log("login user info: " + user.uid + ", " + user.email);
-          updateLoginSession({loginId: user.email});
-
-          user.getIdToken(true).then((idToken:string) => {
-              console.log("user id token: " + idToken);
-          }).catch((error:any) => {
-              console.error("Fail to generate id token");
-          })
-        } 
-      });
 
   }
 

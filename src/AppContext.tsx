@@ -1,20 +1,17 @@
 import React, { useState, Dispatch, SetStateAction } from 'react';
-import * as firebase from 'firebase/app';
-import 'firebase/auth'; // load authentication module
+import { AuthService } from './services/AuthService';
+// import * as firebase from 'firebase/app';
+
 
 export interface ServiceContextModel {
-    services: {
-        firebase: any
-    }
+    services: Map<string, any>
 }
 export interface LoginSessionContextModel {
     loginId: string;
 }
 
 const INITIAL_SRV_CONTEXT: ServiceContextModel = {
-    services: {
-        firebase: null
-    }
+    services: new Map<string, any>()
 }
 
 const INITIAL_LOGIN_SESSION_CONTEXT: LoginSessionContextModel = {
@@ -23,35 +20,26 @@ const INITIAL_LOGIN_SESSION_CONTEXT: LoginSessionContextModel = {
 
 export const initializeServiceContext = (): ServiceContextModel => {
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyBDWARXfHWeDa4Yv7-Vi_YEs5p3FVZUhYM",
-        authDomain: "mpf-price-app.firebaseapp.com",
-        databaseURL: "https://mpf-price-app.firebaseio.com",
-        projectId: "mpf-price-app",
-        storageBucket: "mpf-price-app.appspot.com",
-        messagingSenderId: "929922075615",
-        appId: "1:929922075615:web:d13c2930402b09757f526a"
-    };
+    const serviceMap = new Map<string, any>();
 
-    const firebaseApp = (firebase.apps.length != 0)? firebase.app() : firebase.initializeApp(firebaseConfig);
+    const authService = new AuthService();
+
+    serviceMap.set("authService", authService);
 
     return {
-        services: {
-            firebase: firebaseApp
-        }
+        services: serviceMap
     };
 }
 
 export const initializeLoginSessionContext = (serviceContext: ServiceContextModel): LoginSessionContextModel => {
    
-    const firebase = serviceContext.services.firebase;
+    const authService: AuthService = serviceContext.services.get("authService");
    
-    let loginId = "";
-    if (firebase.auth().currentUser != null && firebase.auth().currentUser.email != null)
-        loginId = firebase.auth().currentUser.email;
+    let loginId = authService.getCurrentLoginId();
 
     return {
         loginId: loginId
+        
     }
 }
 
