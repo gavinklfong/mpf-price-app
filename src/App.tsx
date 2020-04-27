@@ -11,6 +11,8 @@ import Dashboard  from './pages/Dashboard';
 import Chart from './pages/Chart';
 import Login from './pages/Login';
 
+import RouteWithAuth from './components/RouteWithAuth';
+
 import ErrorBoundary from './components/ErrorBoundary';
 
 
@@ -36,9 +38,10 @@ import './theme/variables.css';
 
 const App: React.FC = () => {
 
-  const serviceContextValue = initializeServiceContext();
-  const [loginSession, updateLoginSession]= useState<LoginSessionContextModel>(initializeLoginSessionContext(serviceContextValue));
+  const [loginSession, updateLoginSession]= useState<LoginSessionContextModel>(initializeLoginSessionContext());
   const loginSessionContextValue = {loginSession, updateLoginSession};
+  const serviceContextValue = initializeServiceContext(loginSession, updateLoginSession);
+
   
   return (
     <ServiceContextProvider value={serviceContextValue}>
@@ -49,8 +52,8 @@ const App: React.FC = () => {
           <IonSplitPane contentId="main">
             <Menu />
             <IonRouterOutlet id="main">
-              <Route path="/page/Dashboard" component={Dashboard} exact />
-              <Route path="/page/Chart" component={Chart} exact />
+              <Route path="/page/Dashboard" component={RouteWithAuth(Dashboard)} exact />
+              <Route path="/page/Chart" component={RouteWithAuth(Chart)} exact />
               <Route path="/page/Login" component={Login} exact />
               <Redirect from="/" to="/page/Dashboard" exact />
             </IonRouterOutlet>

@@ -34,7 +34,7 @@ const randomByte = () => randomNumber(0, 255)
 const randomPercent = () => (randomNumber(50, 100) * 0.01).toFixed(2)
 const randomCssRgba = () => `rgba(${[randomByte(), randomByte(), randomByte(), randomPercent()].join(',')})`
 
-const stringHasValue = (value: string | undefined): boolean => (!!value && typeof value !== "undefined" && value.length > 0)
+const stringHasValue = (value: string | undefined): boolean => (!!value && typeof value !== "undefined" && value.trim().length > 0)
 const arrayHasValue = (value: Array<any> | undefined): boolean => (!!value && typeof value !== "undefined" && value.length > 0)
 
 
@@ -45,12 +45,17 @@ export const useChart = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<S
       // retrieve trustee list
     useEffect(() => {
 
-        mpfService.getTrustees()
-        .then(trusteeList => {
+        const run = async () => {
+            setShowLoading(true);
+            const trusteeList = await mpfService.getTrustees();
+
             console.debug("retrieved trustees: " + trusteeList);
             let formData: ChartTabForm = {...chartTabForm, trusteeList: trusteeList};
-            setChartTabForm(formData);    
-        })
+            setChartTabForm(formData); 
+            setShowLoading(false);   
+        }
+
+        run();
         
     }, []);
 
@@ -58,17 +63,15 @@ export const useChart = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<S
 
         console.debug("useEffect() - trusteeSelected() - [" + chartTabForm.trustee + "]");
 
-        let scheme = "";
+        const run = async () => {
 
-        if (stringHasValue(chartTabForm.trustee)) {
-            // fetch trustee fund records
+            let scheme = "";
 
+            if (stringHasValue(chartTabForm.trustee)) {
+                // fetch trustee fund records
 
-            mpfService.getTrustee(chartTabForm.trustee)
-            .then(fundRecords => {
                 setShowLoading(true);
-
-
+                const fundRecords = await mpfService.getTrustee(chartTabForm.trustee);
                 if (!!fundRecords && fundRecords.length > 0 ) {
                     // set scheme dropdown list
                     let schemeSet =  new Set<string>();
@@ -86,10 +89,10 @@ export const useChart = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<S
                 }
 
                 setShowLoading(false);
-            
-            });
-
+            }
         }
+
+        run();
 
     }, [chartTabForm.trustee]);
 

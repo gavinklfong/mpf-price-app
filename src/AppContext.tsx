@@ -19,11 +19,14 @@ const INITIAL_LOGIN_SESSION_CONTEXT: LoginSessionContextModel = {
     loginId: ""
 }
 
-export const initializeServiceContext = (): ServiceContextModel => {
+export const initializeServiceContext = (loginSession: LoginSessionContextModel, updateLoginSession: Dispatch<SetStateAction<LoginSessionContextModel>>): ServiceContextModel => {
 
     const serviceMap = new Map<string, any>();
 
     const authService = new AuthService();
+    // authService.onAuthStateChange((user:any) => {
+    //     updateLoginSession({...loginSession, loginId: user.email})
+    // });
 
     const mpfService = new MPFService(authService);
 
@@ -35,14 +38,14 @@ export const initializeServiceContext = (): ServiceContextModel => {
     };
 }
 
-export const initializeLoginSessionContext = (serviceContext: ServiceContextModel): LoginSessionContextModel => {
+export const initializeLoginSessionContext = (): LoginSessionContextModel => {
    
-    const authService: AuthService = serviceContext.services.get("authService");
+    // const authService: AuthService = serviceContext.services.get("authService");
    
-    let loginId = authService.getCurrentLoginId();
+    // let loginId = authService.getCurrentLoginId();
 
     return {
-        loginId: loginId
+        loginId: ""
         
     }
 }

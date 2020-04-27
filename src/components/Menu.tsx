@@ -27,6 +27,7 @@ interface AppPage {
   iosIcon: string;
   mdIcon: string;
   title: string;
+  needAuthentication: boolean;
 }
 
 const appPages: AppPage[] = [
@@ -34,13 +35,15 @@ const appPages: AppPage[] = [
     title: 'Chart',
     url: '/page/Chart',
     iosIcon: mailOutline,
-    mdIcon: mailSharp
+    mdIcon: mailSharp,
+    needAuthentication: true
   },
   {
     title: 'Dashboard',
     url: '/page/Dashboard',
     iosIcon: paperPlaneOutline,
-    mdIcon: paperPlaneSharp
+    mdIcon: paperPlaneSharp,
+    needAuthentication: true
   }
 ];
 
@@ -52,7 +55,13 @@ const Menu: React.FC = () => {
   const {loginSession, updateLoginSession} = useContext(LoginSessionContext);
   const userEmail = loginSession.loginId
 
-
+  let isAuthenticated = false;
+  if (userEmail == null) {
+      isAuthenticated = false;
+  } else {
+      isAuthenticated = true;
+  }
+ 
   return (
     <IonMenu contentId="main" type="overlay">
       <IonContent>
@@ -61,12 +70,14 @@ const Menu: React.FC = () => {
           <Avatar name={userEmail} round={true} size="50" />
           {/* </IonItem> */}
           {/* <IonListHeader>Profile</IonListHeader> */}
-          { userEmail 
+          { isAuthenticated 
             ? <IonNote>{userEmail}</IonNote>
             : <IonButton size="small" href="/page/Login">Login</IonButton>
 
           }
-          {appPages.map((appPage, index) => {
+          {appPages
+          .filter(appPage => ((!appPage.needAuthentication) || (appPage.needAuthentication && isAuthenticated)))
+          .map((appPage, index) => {
             return (
               <IonMenuToggle key={index} autoHide={false}>
                 <IonItem className={location.pathname === appPage.url ? 'selected' : ''} routerLink={appPage.url} routerDirection="none" lines="none" detail={false}>
