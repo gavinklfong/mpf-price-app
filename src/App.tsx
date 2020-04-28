@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Redirect, Route } from 'react-router-dom';
 import { IonApp, IonRouterOutlet, IonSplitPane } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { apps, flash, send, trendingUp, search } from 'ionicons/icons';
 
 import { LoginSessionContextProvider, ServiceContextProvider, initializeServiceContext, initializeLoginSessionContext, LoginSessionContextModel}  from './AppContext';
+import { useAppContextInitialization } from './hooks/ContextHook';
 
 import Menu from './components/Menu';
 import Dashboard  from './pages/Dashboard';
@@ -12,6 +13,8 @@ import Chart from './pages/Chart';
 import Login from './pages/Login';
 
 import RouteWithAuth from './components/RouteWithAuth';
+
+import { AuthService } from './services/AuthService';
 
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -38,14 +41,11 @@ import './theme/variables.css';
 
 const App: React.FC = () => {
 
-  const [loginSession, updateLoginSession]= useState<LoginSessionContextModel>(initializeLoginSessionContext());
-  const loginSessionContextValue = {loginSession, updateLoginSession};
-  const serviceContextValue = initializeServiceContext(loginSession, updateLoginSession);
-
+  const contextInitialization = useAppContextInitialization();
   
   return (
-    <ServiceContextProvider value={serviceContextValue}>
-      <LoginSessionContextProvider value={loginSessionContextValue}>
+    <ServiceContextProvider value={contextInitialization.serviceContext}>
+      <LoginSessionContextProvider value={{loginSession: contextInitialization.loginSession, updateLoginSession: contextInitialization.updateLoginSession}}>
       <ErrorBoundary>
       <IonApp>
         <IonReactRouter>
@@ -53,7 +53,6 @@ const App: React.FC = () => {
             <Menu />
             <IonRouterOutlet id="main">
               <RouteWithAuth path="/page/Dashboard" component={Dashboard} exact />
-              {/* <Route path="/page/Dashboard" component={Dashboard} exact /> */}
               <RouteWithAuth  path="/page/Chart" component={Chart} exact />
               <Route path="/page/Login" component={Login} exact />
               <Redirect from="/" to="/page/Dashboard" exact />

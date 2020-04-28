@@ -4,7 +4,7 @@ import { map, switchMap, startWith,tap } from 'rxjs/operators'
 import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import ChartComponent, { ChartDataPoint, ChartDataset, Props as ChartProps }  from '../components/ChartComponent';
 import { MPFService, MPFFundPrice, MPFFund, FundPrice, MPFFundPriceQuery } from '../services/MPFService';
-import { useService } from './ServiceHook';
+import { useService } from './ContextHook';
 
 export interface ChartTabForm {
     trusteeList?: string[],

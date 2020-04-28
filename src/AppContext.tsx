@@ -24,9 +24,7 @@ export const initializeServiceContext = (loginSession: LoginSessionContextModel,
     const serviceMap = new Map<string, any>();
 
     const authService = new AuthService();
-    // authService.onAuthStateChange((user:any) => {
-    //     updateLoginSession({...loginSession, loginId: user.email})
-    // });
+
 
     const mpfService = new MPFService(authService);
 
@@ -62,18 +60,6 @@ export const LoginSessionContext = createLoginSessionContext();
 
 export const ServiceContextProvider = ServiceContext.Provider;
 export const LoginSessionContextProvider = LoginSessionContext.Provider;
-
-// export const AppContextProvider: React.FC = (props) => {
-
-//     const [context, setContext]= useState<AppContextModel>(initializeAppContext());
-//     const contextValue = {context, setContext};
-
-//     return (
-//       <AppContext.Provider value={contextValue}>
-//         {props.children}
-//       </AppContext.Provider>
-//     )
-//   }
 
 
 export default ServiceContext;

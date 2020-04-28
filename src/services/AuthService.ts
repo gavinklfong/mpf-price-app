@@ -19,6 +19,8 @@ export class AuthService {
 
     constructor() {
         this.firebase  = (firebase.apps.length != 0)? firebase.app() : firebase.initializeApp(this.firebaseConfig);
+
+        this.firebase.auth().onAuthStateChanged((user:any) => {console.log(user)});
     }
     
 

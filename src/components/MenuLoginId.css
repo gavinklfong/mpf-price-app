@@ -111,3 +111,16 @@ ion-note {
 ion-item.selected {
   --color: var(--ion-color-primary);
 } 
+
+
+.signout-alert {
+  height: 100%;
+  width: 100%;
+}
+
+.signout-alert .alert-wrapper.sc-ion-alert-md {
+  height: 130px;
+  min-height: 130px;
+  width: 300px;
+  min-width: 300px;
+}

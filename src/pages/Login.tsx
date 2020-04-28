@@ -3,7 +3,7 @@ import { useHistory } from "react-router-dom";
 import { IonLoading, IonButtons, IonMenuButton, IonContent, IonHeader, IonItem, IonLabel, IonList, IonPage, IonTitle, IonToolbar, IonInput, IonButton } from '@ionic/react';
 import Collapsible from 'react-collapsible';
 import { LoginSessionContext, ServiceContext } from '../AppContext';
-import { useService } from '../hooks/ServiceHook';
+import { useService } from '../hooks/ContextHook';
 import { AuthService } from '../services/AuthService';
 
 import './Login.css';
