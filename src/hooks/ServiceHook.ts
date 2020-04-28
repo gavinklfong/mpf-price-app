@@ -12,3 +12,7 @@ export const useService = (serviceKey:string): any => {
     return serviceContext.services.get(serviceKey);
 
 }
+
+export const useAppContext = (): any => {
+    return useContext(LoginSessionContext);
+}

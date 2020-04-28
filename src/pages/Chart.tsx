@@ -19,13 +19,12 @@ import {
   IonSegmentButton,
   IonMenuButton
 } from '@ionic/react';
-import React, {useState} from 'react';
+import React, { useState, Dispatch, SetStateAction } from 'react';
 import './Chart.css';
 import ChartComponent from '../components/ChartComponent';
 import { useChart, ChartTabForm } from '../hooks/ChartHook';
 import Collapsible from 'react-collapsible';
 import { MPFFund } from '../services/MPFService';
-
 
 // import './base/_Collapsible.scss';
 
@@ -43,6 +42,7 @@ const Chart: React.FC = () => {
       chartLabels: [], chartDatasets: [],
       trusteeList: [], schemeList: [], fundList: []
    });
+
 
   useChart(chartTabForm, setChartTabForm, setShowLoading);
 

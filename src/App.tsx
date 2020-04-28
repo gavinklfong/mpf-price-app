@@ -52,8 +52,9 @@ const App: React.FC = () => {
           <IonSplitPane contentId="main">
             <Menu />
             <IonRouterOutlet id="main">
-              <Route path="/page/Dashboard" component={RouteWithAuth(Dashboard)} exact />
-              <Route path="/page/Chart" component={RouteWithAuth(Chart)} exact />
+              <RouteWithAuth path="/page/Dashboard" component={Dashboard} exact />
+              {/* <Route path="/page/Dashboard" component={Dashboard} exact /> */}
+              <RouteWithAuth  path="/page/Chart" component={Chart} exact />
               <Route path="/page/Login" component={Login} exact />
               <Redirect from="/" to="/page/Dashboard" exact />
             </IonRouterOutlet>

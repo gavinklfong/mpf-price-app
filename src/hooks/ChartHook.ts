@@ -38,21 +38,50 @@ const stringHasValue = (value: string | undefined): boolean => (!!value && typeo
 const arrayHasValue = (value: Array<any> | undefined): boolean => (!!value && typeof value !== "undefined" && value.length > 0)
 
 
+class LoadingUpdater {
+
+    private onCount = 0;
+    private setShowLoading: Dispatch<SetStateAction<boolean>>;
+  
+    constructor(setShowLoading: Dispatch<SetStateAction<boolean>>) { 
+      this.setShowLoading = setShowLoading;
+    }
+  
+    close() {
+      if (this.onCount > 0) this.onCount--;
+
+      if (this.onCount == 0) this.setShowLoading(false);
+
+    }
+  
+    show() {
+      if (this.onCount == 0) this.setShowLoading(true);
+     
+      this.onCount++;  
+
+    }
+  }
+
+
 export const useChart = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<SetStateAction<ChartTabForm>>, setShowLoading: Dispatch<SetStateAction<boolean>>) => {
 
     const mpfService: MPFService = useService("mpfService");
+
+    const loadingUpdater = new LoadingUpdater(setShowLoading);
 
       // retrieve trustee list
     useEffect(() => {
 
         const run = async () => {
-            setShowLoading(true);
+            // setShowLoading(true);
+            loadingUpdater.show();
             const trusteeList = await mpfService.getTrustees();
 
             console.debug("retrieved trustees: " + trusteeList);
             let formData: ChartTabForm = {...chartTabForm, trusteeList: trusteeList};
             setChartTabForm(formData); 
-            setShowLoading(false);   
+            // setShowLoading(false);   
+            loadingUpdater.close();
         }
 
         run();
@@ -70,7 +99,8 @@ export const useChart = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<S
             if (stringHasValue(chartTabForm.trustee)) {
                 // fetch trustee fund records
 
-                setShowLoading(true);
+                // setShowLoading(true);
+                loadingUpdater.show();
                 const fundRecords = await mpfService.getTrustee(chartTabForm.trustee);
                 if (!!fundRecords && fundRecords.length > 0 ) {
                     // set scheme dropdown list
@@ -88,7 +118,8 @@ export const useChart = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<S
                     setChartTabForm({...chartTabForm, fundRecords: [], schemeList: [], scheme: ""});
                 }
 
-                setShowLoading(false);
+                 // setShowLoading(false);
+                loadingUpdater.close();
             }
         }
 
@@ -101,11 +132,13 @@ export const useChart = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<S
         console.debug("useEffect() - schemeSelected() - [" + chartTabForm.scheme + "]");
         
         if (stringHasValue(chartTabForm.scheme) && arrayHasValue(chartTabForm.fundRecords)) {
+            loadingUpdater.show();
             let fundList = chartTabForm.fundRecords!.filter(item => item.scheme === chartTabForm.scheme).map(item => item.fund);
             if (arrayHasValue(chartTabForm.schemeList)) {
                 let fund = [fundList[0]];
                 setChartTabForm({...chartTabForm, fundList: fundList, funds: fund, selectedFundText: fundList[0]});  
             }
+            loadingUpdater.close();
         }
 
     }, [chartTabForm.scheme]);
@@ -117,7 +150,8 @@ export const useChart = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<S
 
         if (chartTabForm.funds && chartTabForm.funds.length > 0) {
     
-            setShowLoading(true);
+            // setShowLoading(true);
+            loadingUpdater.show();
             console.debug("fetching fund prices");
 
             let queryFunds = new Array<MPFFund>();
@@ -142,7 +176,8 @@ export const useChart = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<S
             });
 
             setChartTabForm({...chartTabForm, fundPriceMap: fundPriceMap});
-            setShowLoading(false);
+            // setShowLoading(false);
+            loadingUpdater.close();
             
         }
         })();
@@ -159,7 +194,8 @@ export const useChart = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<S
 
             console.debug(chartTabForm.fundPriceMap);
 
-            setShowLoading(true);
+            // setShowLoading(true);
+            loadingUpdater.show();
 
             let chartDatasets = new Array<ChartDataset>();
             let chartXAxisLabels = new Array<string>();
@@ -169,7 +205,8 @@ export const useChart = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<S
                 chartXAxisLabels = labels;
             });
             setChartTabForm({...chartTabForm, chartLabels: chartXAxisLabels, chartDatasets: chartDatasets}); 
-            setShowLoading(false);
+            // setShowLoading(false);
+            loadingUpdater.close();
         }
 
     }, [chartTabForm.fundPriceMap, chartTabForm.displayInPercent]);

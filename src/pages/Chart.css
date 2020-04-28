@@ -8,6 +8,17 @@ ion-select {
   max-width: 100%;  /* default settings: 45% */
 }
 
+/* fund selection pop up size */
+.alert-wrapper.sc-ion-alert-md {
+  --min-width: 80%;
+  --width: 80%;
+  --height: 80%;
+}
+
+.alert-checkbox-group.sc-ion-alert-md {
+  max-height: 80%;
+}
+
 /* //The content within the collaspable area */
 .Collapsible__contentInner {
   padding: 10px;

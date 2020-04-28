@@ -21,7 +21,6 @@ const Login: React.FC = () => {
 
   const {loginSession, updateLoginSession} = useContext(LoginSessionContext);
   
-  const firebaseApp = useService("firebase");
   const authService: AuthService = useService("authService");
   
   let initialLoginId = loginSession.loginId;

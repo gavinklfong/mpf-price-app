@@ -23,11 +23,13 @@ export class AuthService {
     
 
     async signInWithEmailAndPassword(userId:string, password:string): Promise<any> {
-        console.log("sign out");
+        
         await this.signOut();
 
         console.log("sign in as " + userId);
         try {
+
+            await this.firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
             return await this.firebase.auth().signInWithEmailAndPassword(userId, password);
         } catch (e) {
             console.log(e);

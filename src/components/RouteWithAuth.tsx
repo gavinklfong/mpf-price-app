@@ -1,30 +1,10 @@
-import {
-    IonContent,
-    IonIcon,
-    IonItem,
-    IonLabel,
-    IonList,
-    IonListHeader,
-    IonMenu,
-    IonMenuToggle,
-    IonNote,
-    IonAvatar,
-    IonChip,
-    IonButton
-} from '@ionic/react';
-  
-import React, { useContext, Component, ComponentType, ComponentClass } from 'react';
-import { useLocation, Redirect, Route } from 'react-router-dom';
+import React, { Component, ReactNode, ComponentType, useContext } from 'react';
 import { RouteProps } from 'react-router';
-
-  
+import { useLocation, Redirect, Route } from 'react-router-dom';
 import { LoginSessionContext } from '../AppContext';
-  
-  
-function RouteWithAuth<T>(WrappedComponent: ComponentType<T>) {
 
-    // const location = useLocation();
-            
+export const RouteWithAuth: React.FC<RouteProps> = (props)  => {
+        
     const {loginSession, updateLoginSession} = useContext(LoginSessionContext);
     const userEmail = loginSession.loginId
 
@@ -37,16 +17,15 @@ function RouteWithAuth<T>(WrappedComponent: ComponentType<T>) {
 
     console.log("RouteWithAuth(): isAuthenticated = " + isAuthenticated + ", loginId = " + loginSession.loginId);
 
-    return (props: T) => (
-        <>
+    return (
             (!isAuthenticated) ? (
                 <Redirect to='/page/login'/>
             ) : (
-                <WrappedComponent {...props} />
+                <Route {...props} />
             )  
-        </>
     )
-};
+
+}
+
   
 export default RouteWithAuth;
-  
