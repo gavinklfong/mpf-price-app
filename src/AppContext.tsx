@@ -1,7 +1,8 @@
 import React, { useState, Dispatch, SetStateAction } from 'react';
 import { AuthService } from './services/AuthService';
 import { MPFService } from './services/MPFService';
-// import * as firebase from 'firebase/app';
+import { ConfigService } from './services/ConfigService';
+import { FirebaseService } from './services/FirebaseService';
 
 
 export interface ServiceContextModel {
@@ -23,10 +24,11 @@ export const initializeServiceContext = (loginSession: LoginSessionContextModel,
 
     const serviceMap = new Map<string, any>();
 
-    const authService = new AuthService();
+    const firebaseService = new FirebaseService();
 
-
-    const mpfService = new MPFService(authService);
+    const configService = new ConfigService(firebaseService);
+    const authService = new AuthService(firebaseService);
+    const mpfService = new MPFService(authService, configService);
 
     serviceMap.set("authService", authService);
     serviceMap.set("mpfService", mpfService);

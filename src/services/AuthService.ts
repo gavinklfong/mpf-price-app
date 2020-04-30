@@ -1,26 +1,14 @@
 import * as firebase from 'firebase/app';
 import 'firebase/auth';
+import { FirebaseService } from './FirebaseService';
 
 
 export class AuthService {
 
     firebase:any;
 
-    firebaseConfig = {
-        apiKey: "AIzaSyBDWARXfHWeDa4Yv7-Vi_YEs5p3FVZUhYM",
-        authDomain: "mpf-price-app.firebaseapp.com",
-        databaseURL: "https://mpf-price-app.firebaseio.com",
-        projectId: "mpf-price-app",
-        storageBucket: "mpf-price-app.appspot.com",
-        messagingSenderId: "929922075615",
-        appId: "1:929922075615:web:d13c2930402b09757f526a"
-    };
-
-
-    constructor() {
-        this.firebase  = (firebase.apps.length != 0)? firebase.app() : firebase.initializeApp(this.firebaseConfig);
-
-        this.firebase.auth().onAuthStateChanged((user:any) => {console.log(user)});
+    constructor(firebaseService: FirebaseService) {
+        this.firebase  = firebaseService.firebase;
     }
     
 

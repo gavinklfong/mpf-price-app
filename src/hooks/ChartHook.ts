@@ -2,9 +2,15 @@ import moment from 'moment';
 import { Observable, of } from 'rxjs';
 import { map, switchMap, startWith,tap } from 'rxjs/operators'
 import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
+import {
+    useIonViewDidEnter,
+    useIonViewDidLeave,
+    useIonViewWillEnter,
+    useIonViewWillLeave
+  } from '@ionic/react';
 import ChartComponent, { ChartDataPoint, ChartDataset, Props as ChartProps }  from '../components/ChartComponent';
 import { MPFService, MPFFundPrice, MPFFund, FundPrice, MPFFundPriceQuery } from '../services/MPFService';
-import { useService } from './ContextHook';
+import { useService, useAppContext } from './ContextHook';
 
 export interface ChartTabForm {
     trusteeList?: string[],
@@ -65,13 +71,13 @@ class LoadingUpdater {
 
 export const useChart = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<SetStateAction<ChartTabForm>>, setShowLoading: Dispatch<SetStateAction<boolean>>) => {
 
+    let {loginSession, updateLoginSession} = useAppContext();
     const mpfService: MPFService = useService("mpfService");
 
     const loadingUpdater = new LoadingUpdater(setShowLoading);
 
-      // retrieve trustee list
-    useEffect(() => {
-
+    useIonViewWillEnter(async () => {
+        console.log('useChart() ionViewWillEnter event fired');
         const run = async () => {
             // setShowLoading(true);
             loadingUpdater.show();
@@ -84,9 +90,27 @@ export const useChart = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<S
             loadingUpdater.close();
         }
 
-        run();
+        await run();
+      });
+
+      // retrieve trustee list
+    // useEffect(() => {
+
+    //     const run = async () => {
+    //         // setShowLoading(true);
+    //         loadingUpdater.show();
+    //         const trusteeList = await mpfService.getTrustees();
+
+    //         console.debug("retrieved trustees: " + trusteeList);
+    //         let formData: ChartTabForm = {...chartTabForm, trusteeList: trusteeList};
+    //         setChartTabForm(formData); 
+    //         // setShowLoading(false);   
+    //         loadingUpdater.close();
+    //     }
+
+    //     run();
         
-    }, []);
+    // }, [loginSession.loginId]);
 
     useEffect(() => {
 

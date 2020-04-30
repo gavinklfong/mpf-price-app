@@ -17,7 +17,11 @@ import {
   IonButtons,
   IonSegment,
   IonSegmentButton,
-  IonMenuButton
+  IonMenuButton,
+  useIonViewDidEnter,
+  useIonViewDidLeave,
+  useIonViewWillEnter,
+  useIonViewWillLeave
 } from '@ionic/react';
 import React, { useState, Dispatch, SetStateAction } from 'react';
 import './Chart.css';
@@ -46,6 +50,21 @@ const Chart: React.FC = () => {
 
   useChart(chartTabForm, setChartTabForm, setShowLoading);
 
+  useIonViewDidEnter(() => {
+    console.log('ionViewDidEnter event fired');
+  });
+
+  useIonViewDidLeave(() => {
+    console.log('ionViewDidLeave event fired');
+  });
+
+  useIonViewWillEnter(() => {
+    console.log('ionViewWillEnter event fired');
+  });
+
+  useIonViewWillLeave(() => {
+    console.log('ionViewWillLeave event fired');
+  });
 
   const handleFundSelectionChange = (e: any) => {
       console.debug(e);
@@ -137,11 +156,21 @@ const Chart: React.FC = () => {
               selectedText={chartTabForm.trustee} 
               value={chartTabForm.trustee} 
               onIonChange={handleInputChange}> 
-              { chartTabForm.trusteeList!.map((item: string) => {
-                return (
-                  <IonSelectOption key={item} value={item}>{item}</IonSelectOption>
-                );
-              })}
+              {
+              //  ( () => {
+                // console.log(chartTabForm.trusteeList);
+                  // if (chartTabForm.trusteeList != null && chartTabForm.trusteeList!.length > 0) {
+                    chartTabForm.trusteeList &&
+                      chartTabForm.trusteeList?.map((item: string) => {
+                        return (
+                          <IonSelectOption key={item} value={item}>{item}</IonSelectOption>
+                        );
+                      }) 
+                    // } else {
+                      // return "";
+                    // }
+                  // })()
+              }
             </IonSelect>            
           </IonItem>
           <IonItem>
