@@ -8,6 +8,9 @@ export const RouteWithAuth: React.FC<RouteProps> = (props)  => {
     const {loginSession, updateLoginSession} = useContext(LoginSessionContext);
     const userEmail = loginSession.loginId
 
+    const location = useLocation();
+    console.log(location);
+
     let isAuthenticated = false;
     if (loginSession == null || loginSession.loginId == null || loginSession.loginId.trim().length == 0) {
         isAuthenticated = false;
@@ -18,12 +21,32 @@ export const RouteWithAuth: React.FC<RouteProps> = (props)  => {
     console.log("RouteWithAuth(): isAuthenticated = " + isAuthenticated + ", loginId = " + loginSession.loginId);
 
     return (
-            (!isAuthenticated) ? (
-                <Redirect to='/page/login'/>
-            ) : (
-                <Route {...props} />
-            )  
+        (!isAuthenticated) ? (
+            <Route path={props.path} exact={props.exact} >
+                <Redirect to={{pathname: '/page/login', state: { from: location }}}/>
+            </Route>
+        ) : (
+            <Route {...props} />
+        )  
     )
+
+    // return (
+    //     <Route
+    //       {...props}
+    //       render={({ location }) =>
+    //         isAuthenticated ? (
+    //           props.component
+    //         ) : (
+    //           <Redirect
+    //             to={{
+    //               pathname: "/pages/Login",
+    //               state: { from: location }
+    //             }}
+    //           />
+    //         )
+    //       }
+    //     />
+    //   );
 
 }
 

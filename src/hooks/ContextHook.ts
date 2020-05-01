@@ -1,9 +1,7 @@
 
-import moment from 'moment';
-import { Observable, of } from 'rxjs';
-import { map, switchMap, startWith,tap } from 'rxjs/operators'
 import React, { useState, useEffect, Dispatch, SetStateAction, useContext} from 'react';
 import { LoginSessionContext, ServiceContext, ServiceContextModel } from '../AppContext';
+import { useHistory, useLocation } from "react-router-dom";
 import { AuthService } from '../services/AuthService';
 import { MPFService } from '../services/MPFService';
 import { initializeLoginSessionContext, initializeServiceContext, LoginSessionContextModel } from '../AppContext';
@@ -32,14 +30,19 @@ export const useAppContextInitialization = (): AppContextInitialization => {
     const loginSessionContextValue = {loginSession, updateLoginSession};
     const serviceContext = initializeServiceContext(loginSession, updateLoginSession);
   
+    // const history = useHistory();
+
     useEffect(() => {
   
       const authService: AuthService = serviceContext.services.get("authService");
       const mpfService: MPFService = serviceContext.services.get("mpfService");
-
   
       authService.onAuthStateChange((user:any) => {
-        updateLoginSession({...loginSession, loginId: user.email})
+
+        if (user == null || user.email == null)
+          return;
+
+        updateLoginSession({...loginSession, loginId: user.email});
       });
   
     }, []);

@@ -8,7 +8,7 @@ import { LoginSessionContextProvider, ServiceContextProvider, initializeServiceC
 import { useAppContextInitialization } from './hooks/ContextHook';
 
 import Menu from './components/Menu';
-import Dashboard  from './pages/Dashboard';
+import Summary  from './pages/Summary';
 import Chart from './pages/Chart';
 import Login from './pages/Login';
 
@@ -52,10 +52,12 @@ const App: React.FC = () => {
           <IonSplitPane contentId="main">
             <Menu />
             <IonRouterOutlet id="main">
-              <RouteWithAuth path="/page/Dashboard" component={Dashboard} exact />
-              <RouteWithAuth  path="/page/Chart" component={Chart} exact />
+              <RouteWithAuth path="/page/Summary" exact component={Summary}>
+              </RouteWithAuth>
+              <RouteWithAuth  path="/page/Chart" exact component={Chart}>
+              </RouteWithAuth>
               <Route path="/page/Login" component={Login} exact />
-              <Redirect from="/" to="/page/Dashboard" exact />
+              <Redirect from="/" to="/page/Summary" exact />
             </IonRouterOutlet>
           </IonSplitPane>
         </IonReactRouter>

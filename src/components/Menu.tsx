@@ -35,17 +35,17 @@ interface AppPage {
 
 const appPages: AppPage[] = [
   {
+    title: 'Summary',
+    url: '/page/Summary',
+    iosIcon: paperPlaneOutline,
+    mdIcon: paperPlaneSharp,
+    needAuthentication: true
+  },
+  {
     title: 'Chart',
     url: '/page/Chart',
     iosIcon: mailOutline,
     mdIcon: mailSharp,
-    needAuthentication: true
-  },
-  {
-    title: 'Dashboard',
-    url: '/page/Dashboard',
-    iosIcon: paperPlaneOutline,
-    mdIcon: paperPlaneSharp,
     needAuthentication: true
   }
 ];

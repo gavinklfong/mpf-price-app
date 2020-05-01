@@ -15,7 +15,7 @@ export class FirebaseService {
     firebase: any;
 
     constructor() {
-        this.firebase  = (firebase.apps.length != 0)? firebase.app() : firebase.initializeApp(FIREBASE_CONFIG);
+        this.firebase  = (firebase.apps.length !== 0)? firebase.app() : firebase.initializeApp(FIREBASE_CONFIG);
     }
 
 }

@@ -79,13 +79,16 @@ export const useChart = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<S
     useIonViewWillEnter(async () => {
         console.log('useChart() ionViewWillEnter event fired');
         const run = async () => {
+
+            if (chartTabForm.trusteeList != null && chartTabForm.trusteeList.length > 0)
+                return;
+
             // setShowLoading(true);
             loadingUpdater.show();
             const trusteeList = await mpfService.getTrustees();
 
             console.debug("retrieved trustees: " + trusteeList);
-            let formData: ChartTabForm = {...chartTabForm, trusteeList: trusteeList};
-            setChartTabForm(formData); 
+            setChartTabForm({...chartTabForm, trusteeList: trusteeList}); 
             // setShowLoading(false);   
             loadingUpdater.close();
         }

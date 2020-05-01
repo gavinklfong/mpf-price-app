@@ -29,9 +29,13 @@ export interface MPFFund {
     fund: string;
 }
 
-// const MPF_BASE_URL = "https://ymfsropn9g.execute-api.us-east-2.amazonaws.com/dev/mpf/";
-
-// const API_KEY = "EKJRmsQhdN7PUvIY6RYJg1nhesEq95Rx41igtoFT";
+export interface MPFFundSummary {
+    fund: MPFFund;
+    mth1: number;
+    mth3: number;
+    mth6: number;
+    mth12: number;
+}
 
 
 export class MPFService {
@@ -40,12 +44,8 @@ export class MPFService {
 
     private configService: ConfigService;
 
-    // private apiEndpoint = "https://ymfsropn9g.execute-api.us-east-2.amazonaws.com/dev/mpf/";
-    // private apiKey = "EKJRmsQhdN7PUvIY6RYJg1nhesEq95Rx41igtoFT";
-   
     private apiEndpoint = "";
     private apiKey = "";
-
 
     constructor(authService: AuthService, configService: ConfigService) {
         this.authService = authService;
@@ -57,6 +57,23 @@ export class MPFService {
         this.apiKey = await this.configService.getProperty("app/api/key");
 
         console.log("MPFService API Endpoint = " + this.apiEndpoint);
+    }
+
+    async getSummary(funds: MPFFund[]): Promise<MPFFundSummary[]> {
+
+        console.debug("sending request ");
+
+        try {
+            const response: any = await this.httpPost("performance", JSON.stringify(funds));
+            console.log("getSummary() - response = " + JSON.stringify(response));
+            let formattedResponse = this.formatFundSummaryResult(response.data);
+            console.log("getSummary() - formattedResponse = " + JSON.stringify(formattedResponse));
+            return formattedResponse;
+        } catch (e) {
+            console.error(e);
+            throw e;
+        }
+
     }
 
     async getFundPrices(query: MPFFundPriceQuery): Promise<MPFFundPrice[]> {
@@ -212,6 +229,34 @@ export class MPFService {
             fundPrice.prices = prices;
 
             return fundPrice;
+
+        });
+
+        return formattedResult;
+    }
+
+    private formatFundSummaryResult(result: any) : Array<MPFFundSummary> {
+
+        let formattedResult : Array<MPFFundSummary> = new Array();
+
+        formattedResult = result.map( (item : any) => {
+
+            const fund = {   
+                trustee: item.trustee, 
+                scheme: item.scheme, 
+                fund: item.fund, 
+            };
+
+            const fundSummary: MPFFundSummary = {
+                fund: fund,
+                mth1: item.growth1Month,
+                mth3: item.growth3Month,
+                mth6: item.growth6Month,
+                mth12: item.growth12Month,
+
+            }
+
+            return fundSummary;
 
         });
 
