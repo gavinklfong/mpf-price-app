@@ -1,81 +1,13 @@
-import React, {useEffect, useState} from 'react';
-import { IonContent, IonHeader, IonItem, IonLabel, IonList, IonPage, IonTitle, IonToolbar, IonButtons, IonMenuButton, IonSelect, IonSelectOption, 
-  IonGrid, IonRow, IonCol} from '@ionic/react';
-import { useService, useAppContext } from '../hooks/ContextHook';
-import { MPFService } from '../services/MPFService';
-import SummaryTable, { Row } from '../components/SummaryTable';
+import React from 'react';
+import { IonContent, IonHeader, IonItem, IonLabel, IonList, IonPage, IonTitle, IonToolbar, IonButtons, IonMenuButton, IonSelect, IonSelectOption } from '@ionic/react';
+import { useSummary, ALL_CATEGORY_ITEM } from '../hooks/SummaryHook';
+import SummaryTable from '../components/SummaryTable';
 import './Summary.css';
 
 
 const Summary: React.FC = () => {
 
-  const [pending, setPending] = useState(true);
-  const [tableRows, setTableRows] = useState<Row[]>([]);
-  const [categoryList, setCategoryList] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
-
-  const {loginSession, updateLoginSession} = useAppContext();
-
-  const mpfService: MPFService = useService("mpfService");
-
-  useEffect(() => {
-    (async () => {
-      setPending(true);
-      updateLoginSession({...loginSession, showLoading: true});
-      let result = await mpfService.getSummaryByFunds([]);
-      let rows = result.map(item => {
-        let row: Row = {
-          trustee: item.fund.trustee,
-          fund: item.fund.fund,
-          mth1: item.mth1,
-          mth3: item.mth3,
-          mth6: item.mth6,
-          mth12: item.mth12
-        }
-        return row;
-      });
-      setTableRows(rows);
-      setPending(false);
-      updateLoginSession({...loginSession, showLoading: false});
-
-    })();
-
-  }, [])
-
-  useEffect(() => {
-    (async () => {
-      let result = await mpfService.getCategories();
-      // console.log(result);
-      setCategoryList(result);
-    })();
-  }, []);
-
-  useEffect(() => {
-
-    (async () => {
-
-      updateLoginSession({...loginSession, showLoading: true});
-      setPending(true);
-      let selectedCategories = [selectedCategory];
-
-      let result = await mpfService.getSummaryByCategories(selectedCategories);
-      let rows = result.map(item => {
-        let row: Row = {
-          trustee: item.fund.trustee,
-          fund: item.fund.fund,
-          mth1: item.mth1,
-          mth3: item.mth3,
-          mth6: item.mth6,
-          mth12: item.mth12
-        }
-        return row;
-      });
-      setTableRows(rows);
-      updateLoginSession({...loginSession, showLoading: false});
-      setPending(false);
-    })();
-
-  }, [selectedCategory]);
+  const [summaryPageModel, setSummaryPageModel, pending] = useSummary();
 
   const handleCategoryChange = (e: any) => {
     console.debug(e);
@@ -83,9 +15,9 @@ const Summary: React.FC = () => {
 
     const {name, value} = e.target
     if (!!value && typeof value !== "undefined" && value.length > 0) {
-      setSelectedCategory(value);
+      setSummaryPageModel({...summaryPageModel, selectedCategory: value});
     }
-}
+  }
 
   return (
     <IonPage>
@@ -98,27 +30,25 @@ const Summary: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent>
-      <IonGrid>
-          <IonRow>
-            <IonCol>
-            <IonSelect interface="action-sheet" placeholder="-- All Category --" 
+        <IonList>
+          <IonItem>
+            <IonLabel>Category</IonLabel>
+            <IonSelect interface="action-sheet" placeholder={ALL_CATEGORY_ITEM} 
                   name="category"
-                  selectedText={selectedCategory}
-                  value={selectedCategory}
+                  selectedText={summaryPageModel.selectedCategory}
+                  value={summaryPageModel.selectedCategory}
                   onIonChange={handleCategoryChange}> 
-                  > 
-                <IonSelectOption value={""}>-- All Category --</IonSelectOption>
                 { 
-                categoryList.map(category => {
-                  return (
-                    <IonSelectOption key={category} value={category}>{category}</IonSelectOption>
-                  )
-              })}
+                  summaryPageModel.categoryList.map(category => {
+                    return (
+                      <IonSelectOption key={category} value={category}>{category}</IonSelectOption>
+                    )
+                  })
+                }
             </IonSelect>  
-            </IonCol>
-          </IonRow>
-        </IonGrid>      
-        <SummaryTable data={tableRows} progressPending={pending}/>
+          </IonItem>
+        </IonList>    
+        <SummaryTable data={summaryPageModel.tableRows} progressPending={pending}/>
       </IonContent>
     </IonPage>
   );

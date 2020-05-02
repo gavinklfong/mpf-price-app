@@ -60,6 +60,7 @@ export class MPFService {
     }
 
     async initialize() {
+        console.log("MPFService.initialize()");
         this.apiEndpoint = await this.configService.getProperty("app/api/endpoint");
         this.apiKey = await this.configService.getProperty("app/api/key");
 

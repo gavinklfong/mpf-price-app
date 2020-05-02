@@ -55,13 +55,13 @@ const conditionalRowStyles = [
 
 
 const columns = [
-    {
-      name: 'Trustee',
-      selector: 'trustee',
-      sortable: true,
-      left: true,
-      width: '60px'
-    },
+    // {
+    //   name: 'Trustee',
+    //   selector: 'trustee',
+    //   sortable: true,
+    //   left: true,
+    //   width: '60px'
+    // },
     {
       name: 'Fund',
       selector: 'fund',
@@ -69,40 +69,40 @@ const columns = [
       left: true,
       width: '300px'
     },
+    // {
+    //   name: '12 M',
+    //   selector: 'mth12',
+    //   sortable: true,
+    //   center: true,
+    //   compact: true,
+    //   width: '70px',
+    //   cell: (row: Row) => formatCell(row.mth12)
+    // },
     {
-      name: '12 M',
-      selector: 'mth12',
-      sortable: true,
-      center: true,
-      compact: true,
-      width: '70px',
-      cell: (row: Row) => formatCell(row.mth12)
-    },
-    {
-      name: '6 M',
+      name: '6M',
       selector: 'mth6',
       sortable: true,
       center: true,
       compact: true,
-      width: '70px',
+      width: '60px',
       cell: (row: Row) => formatCell(row.mth6)
     },
     {
-      name: '3 M',
+      name: '3M',
       selector: 'mth3',
       sortable: true,
       center: true,
       compact: true,
-      width: '70px',
+      width: '60px',
       cell: (row: Row) => formatCell(row.mth3)
     },
     {
-      name: '1 M',
+      name: '1M',
       selector: 'mth1',
       sortable: true,
       center: true,
       compact: true,
-      width: '70px',
+      width: '60px',
       cell: (row: Row) => formatCell(row.mth1)
     },
   ];
@@ -110,21 +110,21 @@ const columns = [
   const customStyles = {
     rows: {
       style: {
-        minHeight: '72px', // override the row height
+        minHeight: '40px', // override the row height
       }
     },
     headCells: {
       style: {
         paddingLeft: '5px', // override the cell padding for head cells
         paddingRight: '5px',
-        fontSize: 'medium'
+        fontSize: 'small'
       },
     },
     cells: {
       style: {
         paddingLeft: '5px', // override the cell padding for data cells
         paddingRight: '5px',
-        fontSize: 'medium'
+        fontSize: 'small'
       },
     },
   };

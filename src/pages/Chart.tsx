@@ -41,7 +41,7 @@ const Chart: React.FC = () => {
    {
       trustee: "", scheme: "", selectedFundText: "", 
       displayInPercent: true, timePeriod: "D",
-      queryTimeRange: 1,
+      queryTimeRange: 12,
       chartLabels: [], chartDatasets: [],
       trusteeList: [], schemeList: [], fundList: []
    });
@@ -140,19 +140,12 @@ const Chart: React.FC = () => {
               value={chartTabForm.trustee} 
               onIonChange={handleInputChange}> 
               {
-              //  ( () => {
-                // console.log(chartTabForm.trusteeList);
-                  // if (chartTabForm.trusteeList != null && chartTabForm.trusteeList!.length > 0) {
-                    chartTabForm.trusteeList &&
-                      chartTabForm.trusteeList?.map((item: string) => {
-                        return (
-                          <IonSelectOption key={item} value={item}>{item}</IonSelectOption>
-                        );
-                      }) 
-                    // } else {
-                      // return "";
-                    // }
-                  // })()
+                chartTabForm.trusteeList &&
+                  chartTabForm.trusteeList?.map((item: string) => {
+                    return (
+                      <IonSelectOption key={item} value={item}>{item}</IonSelectOption>
+                    );
+                  }) 
               }
             </IonSelect>            
           </IonItem>

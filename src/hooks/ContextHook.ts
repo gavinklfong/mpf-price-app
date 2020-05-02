@@ -39,20 +39,16 @@ export const useAppContextInitialization = (): AppContextInitialization => {
 
         console.log("onAuthStateChange() - user = " + JSON.stringify(user));
 
-        if (user == null || user.email == null)
-          return;
-
-        updateLoginSession({...loginSession, loginId: user.email});
+        if (user != null && user.email != null)
+            updateLoginSession({...loginSession, loginId: user.email});
       });
   
     }, []);
 
     useEffect(() => {
   
-        if (loginSession.loginId == null || loginSession.loginId == "")
-            return;
-
-        mpfService.initialize();
+        if (loginSession.loginId != null && loginSession.loginId.length > 0)
+          mpfService.initialize();
     
       }, [loginSession.loginId]);
 
