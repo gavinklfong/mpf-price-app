@@ -23,9 +23,14 @@ const Login: React.FC = () => {
   let initialLoginId = loginSession.loginId;
   const [loginForm, setLoginForm] = useState<LoginForm>({loginId: "gavin_fong@yahoo.com", password: "123456"});
 
-  let from: any  = location.state || { from: { pathname: "/" }  };
+  let from: any  = location.state;
+  if (from == null || from.from == null) {
+    from = { from: { pathname: "/page/Summary" }  };
+  } else if (from.from.pathname == "/page/Login") {
+    from.from.pathname = "/page/Summary";
+  }
   console.log("Login Page: from=" + JSON.stringify(from));
-  // console.log(from);
+
 
   useEffect(() => {
 
@@ -46,10 +51,7 @@ const Login: React.FC = () => {
     try {
       let signInResult = await authService.signInWithEmailAndPassword(loginForm.loginId, loginForm.password);
       console.log(signInResult.user.email);
-      setTimeout(() => { history.push(from.pathname) }, 500)
       updateLoginSession({...loginSession, loginId: signInResult.user.email});
-
-
     } catch (error) {
 
       await authService.signOut();
