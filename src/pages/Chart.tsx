@@ -35,7 +35,6 @@ import { MPFFund } from '../services/MPFService';
 const Chart: React.FC = () => {
 
  
-  const [showLoading, setShowLoading] = useState(false);
   const [chartHeight, setChartHeight] = useState("50vh");
 
   const [chartTabForm, setChartTabForm] = useState<ChartTabForm>(
@@ -48,23 +47,7 @@ const Chart: React.FC = () => {
    });
 
 
-  useChart(chartTabForm, setChartTabForm, setShowLoading);
-
-  useIonViewDidEnter(() => {
-    console.log('ionViewDidEnter event fired');
-  });
-
-  useIonViewDidLeave(() => {
-    console.log('ionViewDidLeave event fired');
-  });
-
-  useIonViewWillEnter(() => {
-    console.log('ionViewWillEnter event fired');
-  });
-
-  useIonViewWillLeave(() => {
-    console.log('ionViewWillLeave event fired');
-  });
+  useChart(chartTabForm, setChartTabForm);
 
   const handleFundSelectionChange = (e: any) => {
       console.debug(e);
@@ -231,11 +214,6 @@ const Chart: React.FC = () => {
             <ChartComponent type="line" height={chartHeight} labels={chartTabForm.chartLabels!} datasets={chartTabForm.chartDatasets!} /> 
         </IonCard>
       </IonContent>
-      <IonLoading
-        isOpen={showLoading}
-        onDidDismiss={() => setShowLoading(false)}
-        message={'Please wait...'}
-      />
     </IonPage>
   );
 };

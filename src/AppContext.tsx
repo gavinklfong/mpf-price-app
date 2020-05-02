@@ -49,7 +49,6 @@ export const initializeLoginSessionContext = (): LoginSessionContextModel => {
     return {
         loginId: "",
         showLoading: false
-        
     }
 }
 

@@ -1,9 +1,7 @@
 import React, {useEffect, useState, useContext} from 'react';
 import { useHistory, useLocation } from "react-router-dom";
-import { IonLoading, IonButtons, IonMenuButton, IonContent, IonHeader, IonItem, IonLabel, IonList, IonPage, IonTitle, IonToolbar, IonInput, IonButton } from '@ionic/react';
-import Collapsible from 'react-collapsible';
-import { LoginSessionContext, ServiceContext } from '../AppContext';
-import { useService } from '../hooks/ContextHook';
+import { IonButtons, IonMenuButton, IonContent, IonHeader, IonItem, IonLabel, IonList, IonPage, IonTitle, IonToolbar, IonInput, IonButton } from '@ionic/react';
+import { useService, useAppContext } from '../hooks/ContextHook';
 import { AuthService } from '../services/AuthService';
 
 import './Login.css';
@@ -18,8 +16,7 @@ const Login: React.FC = () => {
 
   const history = useHistory();
   const location = useLocation();
-
-  const {loginSession, updateLoginSession} = useContext(LoginSessionContext);
+  const {loginSession, updateLoginSession} = useAppContext();
   
   const authService: AuthService = useService("authService");
   

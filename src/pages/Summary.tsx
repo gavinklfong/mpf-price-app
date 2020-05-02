@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { IonContent, IonHeader, IonItem, IonLabel, IonList, IonPage, IonTitle, IonToolbar, IonButtons, IonMenuButton, IonSelect, IonSelectOption, 
   IonGrid, IonRow, IonCol} from '@ionic/react';
-import { useService } from '../hooks/ContextHook';
+import { useService, useAppContext } from '../hooks/ContextHook';
 import { MPFService } from '../services/MPFService';
 import SummaryTable, { Row } from '../components/SummaryTable';
 import './Summary.css';
@@ -13,11 +13,15 @@ const Summary: React.FC = () => {
   const [tableRows, setTableRows] = useState<Row[]>([]);
   const [categoryList, setCategoryList] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+
+  const {loginSession, updateLoginSession} = useAppContext();
+
   const mpfService: MPFService = useService("mpfService");
 
   useEffect(() => {
     (async () => {
       setPending(true);
+      updateLoginSession({...loginSession, showLoading: true});
       let result = await mpfService.getSummaryByFunds([]);
       let rows = result.map(item => {
         let row: Row = {
@@ -32,6 +36,7 @@ const Summary: React.FC = () => {
       });
       setTableRows(rows);
       setPending(false);
+      updateLoginSession({...loginSession, showLoading: false});
 
     })();
 
@@ -49,6 +54,7 @@ const Summary: React.FC = () => {
 
     (async () => {
 
+      updateLoginSession({...loginSession, showLoading: true});
       setPending(true);
       let selectedCategories = [selectedCategory];
 
@@ -65,6 +71,7 @@ const Summary: React.FC = () => {
         return row;
       });
       setTableRows(rows);
+      updateLoginSession({...loginSession, showLoading: false});
       setPending(false);
     })();
 
