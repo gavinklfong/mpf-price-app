@@ -1,6 +1,4 @@
 import moment from 'moment';
-import { Observable, of } from 'rxjs';
-import { map, switchMap, startWith,tap } from 'rxjs/operators'
 import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import {
     useIonViewDidEnter,
@@ -8,11 +6,11 @@ import {
     useIonViewWillEnter,
     useIonViewWillLeave
   } from '@ionic/react';
-import ChartComponent, { ChartDataPoint, ChartDataset, Props as ChartProps }  from '../components/ChartComponent';
+import { ChartDataPoint, ChartDataset }  from '../components/ChartComponent';
 import { MPFService, MPFFundPrice, MPFFund, FundPrice, MPFFundPriceQuery } from '../services/MPFService';
 import { useService, useAppContext } from './ContextHook';
 
-export interface ChartTabForm {
+export interface ChartModel {
     trusteeList?: string[],
     schemeList?: string[],
     fundList?: string[],
@@ -44,7 +42,17 @@ const stringHasValue = (value: string | undefined): boolean => (!!value && typeo
 const arrayHasValue = (value: Array<any> | undefined): boolean => (!!value && typeof value !== "undefined" && value.length > 0)
 
 
-export const useChart = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<SetStateAction<ChartTabForm>>) => {
+export const useChart = () : [ChartModel, Dispatch<SetStateAction<ChartModel>>] => {
+
+    const [chartModel, setChartModel] = useState<ChartModel>(
+        {
+           trustee: "", scheme: "", selectedFundText: "", 
+           displayInPercent: true, timePeriod: "D",
+           queryTimeRange: 12,
+           chartLabels: [], chartDatasets: [],
+           trusteeList: [], schemeList: [], fundList: []
+        });
+
 
     let {loginSession, updateLoginSession} = useAppContext();
     const mpfService: MPFService = useService("mpfService");
@@ -54,16 +62,16 @@ export const useChart = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<S
         console.log('useChart() ionViewWillEnter event fired');
         const run = async () => {
 
-            if (chartTabForm.trusteeList != null && chartTabForm.trusteeList.length > 0)
+            if (chartModel.trusteeList != null && chartModel.trusteeList.length > 0)
                 return;
 
             // setShowLoading(true);
             const trusteeList = await mpfService.getTrustees();
 
             console.debug("retrieved trustees: " + trusteeList);
-            setChartTabForm({...chartTabForm, trusteeList: trusteeList}); 
+            setChartModel(chartModel => ({...chartModel, trusteeList: trusteeList})); 
             // setShowLoading(false);   
-            updateLoginSession({...loginSession, showLoading: false});
+            updateLoginSession((loginSession:any) => ({...loginSession, showLoading: false}));
 
         }
 
@@ -72,16 +80,14 @@ export const useChart = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<S
 
     useEffect(() => {
 
-        console.debug("useEffect() - trusteeSelected() - [" + chartTabForm.trustee + "]");
+        console.debug("useEffect() - trusteeSelected() - [" + chartModel.trustee + "]");
 
         const run = async () => {
-
             let scheme = "";
 
-            if (stringHasValue(chartTabForm.trustee)) {
+            if (stringHasValue(chartModel.trustee)) {
                 // fetch trustee fund records
-
-                const fundRecords = await mpfService.getTrustee(chartTabForm.trustee);
+                const fundRecords = await mpfService.getTrustee(chartModel.trustee);
                 if (!!fundRecords && fundRecords.length > 0 ) {
                     // set scheme dropdown list
                     let schemeSet =  new Set<string>();
@@ -93,30 +99,30 @@ export const useChart = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<S
                     // set selected scheme
                     scheme = schemeList[0];
 
-                    setChartTabForm({...chartTabForm, fundRecords: fundRecords, schemeList: schemeList, scheme: scheme});
+                    setChartModel(chartModel => ({...chartModel, fundRecords: fundRecords, schemeList: schemeList, scheme: scheme}));
                 } else {
-                    setChartTabForm({...chartTabForm, fundRecords: [], schemeList: [], scheme: ""});
+                    setChartModel(chartModel => ({...chartModel, fundRecords: [], schemeList: [], scheme: ""}));
                 }
             }
         }
 
         run();
 
-    }, [chartTabForm.trustee]);
+    }, [chartModel.trustee]);
 
     useEffect(() => {
 
-        console.debug("useEffect() - schemeSelected() - [" + chartTabForm.scheme + "]");
+        console.debug("useEffect() - schemeSelected() - [" + chartModel.scheme + "]");
         
-        if (stringHasValue(chartTabForm.scheme) && arrayHasValue(chartTabForm.fundRecords)) {
-            let fundList = chartTabForm.fundRecords!.filter(item => item.scheme === chartTabForm.scheme).map(item => item.fund);
-            if (arrayHasValue(chartTabForm.schemeList)) {
+        if (stringHasValue(chartModel.scheme) && arrayHasValue(chartModel.fundRecords)) {
+            let fundList = chartModel.fundRecords!.filter(item => item.scheme === chartModel.scheme).map(item => item.fund);
+            if (arrayHasValue(chartModel.schemeList)) {
                 let fund = [fundList[0]];
-                setChartTabForm({...chartTabForm, fundList: fundList, funds: fund, selectedFundText: fundList[0]});  
+                setChartModel(chartModel => ({...chartModel, fundList: fundList, funds: fund, selectedFundText: fundList[0]}));  
             }
         }
 
-    }, [chartTabForm.scheme]);
+    }, [chartModel.scheme]);
 
     useEffect(() => {
 
@@ -124,22 +130,22 @@ export const useChart = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<S
 
         updateLoginSession({...loginSession, showLoading: true});
     
-        console.debug("useEffect() - fundSelected() - [" + chartTabForm.funds + "]");
+        console.debug("useEffect() - fundSelected() - [" + chartModel.funds + "]");
 
-        if (chartTabForm.funds && chartTabForm.funds.length > 0) {
+        if (chartModel.funds && chartModel.funds.length > 0) {
     
             // setShowLoading(true);
             console.debug("fetching fund prices");
 
             let queryFunds = new Array<MPFFund>();
-            for (let i = 0; i < chartTabForm.funds.length; i++) {
-                queryFunds.push({trustee: chartTabForm.trustee, scheme: chartTabForm.scheme, fund: chartTabForm.funds[i]})
+            for (let i = 0; i < chartModel.funds.length; i++) {
+                queryFunds.push({trustee: chartModel.trustee, scheme: chartModel.scheme, fund: chartModel.funds[i]})
             }
 
             let fundPriceQuery: MPFFundPriceQuery = {
-                startDate: +(moment().subtract(chartTabForm.queryTimeRange, "months").format("YYYYMMDD")),
+                startDate: +(moment().subtract(chartModel.queryTimeRange, "months").format("YYYYMMDD")),
                 endDate: +(moment().format("YYYYMMDD")),
-                timePeriod: chartTabForm.timePeriod,
+                timePeriod: chartModel.timePeriod,
                 funds: queryFunds
             }
 
@@ -152,36 +158,35 @@ export const useChart = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<S
                 fundPriceMap.set({trustee: item.trustee, scheme: item.scheme, fund: item.fund}, item);
             });
 
-            setChartTabForm({...chartTabForm, fundPriceMap: fundPriceMap});
-
-            updateLoginSession({...loginSession, showLoading: false});
+            setChartModel(chartModel => ({...chartModel, fundPriceMap: fundPriceMap}));
+            updateLoginSession((loginSession:any) => ({...loginSession, showLoading: false}));
 
         }
         })();
 
-    }, [chartTabForm.funds, chartTabForm.timePeriod, chartTabForm.queryTimeRange]);
+    }, [chartModel.funds, chartModel.timePeriod, chartModel.queryTimeRange]);
 
     useEffect(() => { 
 
         console.debug("useEffect() selected fund price change");
-        console.debug("fundPriceMap : " + chartTabForm.fundPriceMap?.size)
-        console.debug("displayInPercent : " + chartTabForm.displayInPercent)
+        console.debug("fundPriceMap : " + chartModel.fundPriceMap?.size)
+        console.debug("displayInPercent : " + chartModel.displayInPercent)
 
-        if (!!chartTabForm.fundPriceMap && chartTabForm.fundPriceMap.size > 0) {
+        if (!!chartModel.fundPriceMap && chartModel.fundPriceMap.size > 0) {
 
-            console.debug(chartTabForm.fundPriceMap);
+            console.debug(chartModel.fundPriceMap);
 
             let chartDatasets = new Array<ChartDataset>();
             let chartXAxisLabels = new Array<string>();
-            chartTabForm.fundPriceMap.forEach( (fundPrice, fund) => {
-                const [labels, dataset] = prepareChartData(fund, fundPrice.prices, chartTabForm.displayInPercent);
+            chartModel.fundPriceMap.forEach( (fundPrice, fund) => {
+                const [labels, dataset] = prepareChartData(fund, fundPrice.prices, chartModel.displayInPercent);
                 chartDatasets.push(dataset);
                 chartXAxisLabels = labels;
             });
-            setChartTabForm({...chartTabForm, chartLabels: chartXAxisLabels, chartDatasets: chartDatasets}); 
+            setChartModel(chartModel => ({...chartModel, chartLabels: chartXAxisLabels, chartDatasets: chartDatasets})); 
         }
 
-    }, [chartTabForm.fundPriceMap, chartTabForm.displayInPercent]);
+    }, [chartModel.fundPriceMap, chartModel.displayInPercent]);
 
 
     const prepareChartData = (fund: MPFFund, prices: FundPrice[], inPercent: boolean): [Array<string>, ChartDataset] => {
@@ -218,6 +223,6 @@ export const useChart = (chartTabForm: ChartTabForm, setChartTabForm: Dispatch<S
         return [labels, dataset];
     }
 
-   return [chartTabForm, setChartTabForm];
+   return [chartModel, setChartModel];
 
 }

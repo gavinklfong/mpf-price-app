@@ -1,22 +1,10 @@
 import {
-  IonContent,
-  IonIcon,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonListHeader,
-  IonMenu,
-  IonMenuToggle,
   IonNote,
-  IonAvatar,
-  IonChip,
   IonButton,
-  IonPopover,
-  IonModal,
   IonAlert
 } from '@ionic/react';
 
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import Avatar from 'react-avatar';
 import './MenuLoginId.css';
 

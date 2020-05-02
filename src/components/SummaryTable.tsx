@@ -55,13 +55,13 @@ const conditionalRowStyles = [
 
 
 const columns = [
-    // {
-    //   name: 'Trustee',
-    //   selector: 'trustee',
-    //   sortable: true,
-    //   left: true,
-    //   width: '60px'
-    // },
+    {
+      name: 'Trustee',
+      selector: 'trustee',
+      sortable: true,
+      left: true,
+      width: '50px'
+    },
     {
       name: 'Fund',
       selector: 'fund',
@@ -148,6 +148,8 @@ const SummaryTable: React.FC<Props> = (props) => {
         customStyles={customStyles}
         noHeader={true}
         fixedHeader={true}
+        defaultSortField="mth6"
+        defaultSortAsc={false}
         progressPending={props.progressPending}
       />
     )

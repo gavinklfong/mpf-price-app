@@ -30,24 +30,6 @@ export const RouteWithAuth: React.FC<RouteProps> = (props)  => {
         )  
     )
 
-    // return (
-    //     <Route
-    //       {...props}
-    //       render={({ location }) =>
-    //         isAuthenticated ? (
-    //           props.component
-    //         ) : (
-    //           <Redirect
-    //             to={{
-    //               pathname: "/pages/Login",
-    //               state: { from: location }
-    //             }}
-    //           />
-    //         )
-    //       }
-    //     />
-    //   );
-
 }
 
   

@@ -26,33 +26,17 @@ import {
 import React, { useState, Dispatch, SetStateAction } from 'react';
 import './Chart.css';
 import ChartComponent from '../components/ChartComponent';
-import { useChart, ChartTabForm } from '../hooks/ChartHook';
+import { useChart, ChartModel } from '../hooks/ChartHook';
 import Collapsible from 'react-collapsible';
-import { MPFFund } from '../services/MPFService';
-
-// import './base/_Collapsible.scss';
 
 const Chart: React.FC = () => {
 
  
   const [chartHeight, setChartHeight] = useState("50vh");
 
-  const [chartTabForm, setChartTabForm] = useState<ChartTabForm>(
-   {
-      trustee: "", scheme: "", selectedFundText: "", 
-      displayInPercent: true, timePeriod: "D",
-      queryTimeRange: 12,
-      chartLabels: [], chartDatasets: [],
-      trusteeList: [], schemeList: [], fundList: []
-   });
-
-
-  useChart(chartTabForm, setChartTabForm);
+  const [chartModel, setChartModel] = useChart();
 
   const handleFundSelectionChange = (e: any) => {
-      console.debug(e);
-      console.debug(e.target.name);
-
       const values: Array<any> = e.detail.value
       if (!!values && typeof values !== "undefined" && values.length > 0) {
 
@@ -63,7 +47,7 @@ const Chart: React.FC = () => {
             selectedFundText = "Multiple Funds";
         }
         
-         setChartTabForm({...chartTabForm, funds: values, selectedFundText: selectedFundText});
+         setChartModel({...chartModel, funds: values, selectedFundText: selectedFundText});
       }
   
   }
@@ -74,7 +58,7 @@ const Chart: React.FC = () => {
 
       const {name, value} = e.target
       if (!!value && typeof value !== "undefined" && value.length > 0) {
-         setChartTabForm({...chartTabForm, [name]: value})
+         setChartModel({...chartModel, [name]: value})
       }
   }
 
@@ -85,7 +69,7 @@ const Chart: React.FC = () => {
       const {name, value} = e.target
       if (!!value && typeof value !== "undefined") {
          let numberVal = +value;
-         setChartTabForm({...chartTabForm, [name]: numberVal})
+         setChartModel({...chartModel, [name]: numberVal})
       }   
    }
 
@@ -96,7 +80,7 @@ const Chart: React.FC = () => {
       const {name, checked} = e.target
       if (checked != null && typeof checked !== "undefined") {
          let booleanVal = Boolean(checked);
-         setChartTabForm({...chartTabForm, [name]: checked})
+         setChartModel({...chartModel, [name]: checked})
       }   
    }
 
@@ -106,7 +90,7 @@ const Chart: React.FC = () => {
 
       const {name, value} = e.target
       if (!!value && typeof value !== "undefined" && value.length > 0) {
-         setChartTabForm({...chartTabForm, timePeriod: value})
+         setChartModel({...chartModel, timePeriod: value})
       }   
   }
    
@@ -136,12 +120,12 @@ const Chart: React.FC = () => {
             <IonLabel>Trustee</IonLabel>
             <IonSelect interface="action-sheet" placeholder="-- Select Trustee --" 
               name="trustee"
-              selectedText={chartTabForm.trustee} 
-              value={chartTabForm.trustee} 
+              selectedText={chartModel.trustee} 
+              value={chartModel.trustee} 
               onIonChange={handleInputChange}> 
               {
-                chartTabForm.trusteeList &&
-                  chartTabForm.trusteeList?.map((item: string) => {
+                chartModel.trusteeList &&
+                  chartModel.trusteeList?.map((item: string) => {
                     return (
                       <IonSelectOption key={item} value={item}>{item}</IonSelectOption>
                     );
@@ -153,9 +137,9 @@ const Chart: React.FC = () => {
             <IonLabel>Scheme</IonLabel>
             <IonSelect interface="action-sheet" placeholder="-- Select Scheme --" 
             name="scheme"
-            selectedText={chartTabForm.scheme} value={chartTabForm.scheme} 
+            selectedText={chartModel.scheme} value={chartModel.scheme} 
             onIonChange={handleInputChange} >
-               { chartTabForm.schemeList!.map((item) => {
+               { chartModel.schemeList!.map((item) => {
                   return (
                     <IonSelectOption key={item} value={item}>{item}</IonSelectOption>
                   );
@@ -166,9 +150,9 @@ const Chart: React.FC = () => {
             <IonLabel>Fund</IonLabel>
             <IonSelect interface="action-sheet" multiple={true} placeholder="-- Select Funds --" 
             name="fund"
-            selectedText={chartTabForm.selectedFundText} value={chartTabForm.funds} 
+            selectedText={chartModel.selectedFundText} value={chartModel.funds} 
             onIonChange={handleFundSelectionChange} >
-              { chartTabForm.fundList!.map((item: string) => {
+              { chartModel.fundList!.map((item: string) => {
                 return (
                   <IonSelectOption key={item} value={item}>{item}</IonSelectOption>
                 );
@@ -177,7 +161,7 @@ const Chart: React.FC = () => {
           </IonItem>  
           <IonItem>
             <IonLabel>Range</IonLabel>
-            <IonRange name="queryTimeRange" value={chartTabForm.queryTimeRange} min={1} max={12} step={3} debounce={1000} snaps ticks color="danger"
+            <IonRange name="queryTimeRange" value={chartModel.queryTimeRange} min={1} max={12} step={3} debounce={1000} snaps ticks color="danger"
             onIonChange={handleNumberInputChange} >
                 <IonLabel slot="start">1 Month</IonLabel>
                 <IonLabel slot="end">12 Months</IonLabel>
@@ -185,10 +169,10 @@ const Chart: React.FC = () => {
             </IonItem>
             <IonItem>
             <IonLabel>Percent</IonLabel>
-            <IonToggle name="displayInPercent" checked={chartTabForm.displayInPercent} onIonChange={handleToggleInputChange}/>
+            <IonToggle name="displayInPercent" checked={chartModel.displayInPercent} onIonChange={handleToggleInputChange}/>
           </IonItem>   
           <IonItem>
-            <IonSegment value={chartTabForm.timePeriod} onIonChange={timePeriodSelected}>
+            <IonSegment value={chartModel.timePeriod} onIonChange={timePeriodSelected}>
                <IonSegmentButton value="D">
                <IonLabel>Daily</IonLabel>
                </IonSegmentButton>
@@ -204,7 +188,7 @@ const Chart: React.FC = () => {
         </IonCard>
         </Collapsible>
         <IonCard>
-            <ChartComponent type="line" height={chartHeight} labels={chartTabForm.chartLabels!} datasets={chartTabForm.chartDatasets!} /> 
+            <ChartComponent type="line" height={chartHeight} labels={chartModel.chartLabels!} datasets={chartModel.chartDatasets!} /> 
         </IonCard>
       </IonContent>
     </IonPage>
