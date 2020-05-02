@@ -18,7 +18,7 @@ const Summary: React.FC = () => {
   useEffect(() => {
     (async () => {
       setPending(true);
-      let result = await mpfService.getSummary([]);
+      let result = await mpfService.getSummaryByFunds([]);
       let rows = result.map(item => {
         let row: Row = {
           trustee: item.fund.trustee,

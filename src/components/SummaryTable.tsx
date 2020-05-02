@@ -55,13 +55,13 @@ const conditionalRowStyles = [
 
 
 const columns = [
-    // {
-    //   name: 'Trustee',
-    //   selector: 'trustee',
-    //   sortable: true,
-    //   left: true,
-    //   width: '60px'
-    // },
+    {
+      name: 'Trustee',
+      selector: 'trustee',
+      sortable: true,
+      left: true,
+      width: '60px'
+    },
     {
       name: 'Fund',
       selector: 'fund',

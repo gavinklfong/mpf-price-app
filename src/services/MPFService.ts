@@ -72,7 +72,7 @@ export class MPFService {
             this.mpfCatalog = await this.getCatalog();
     }
 
-    async getSummary(funds: MPFFund[]): Promise<MPFFundSummary[]> {
+    async getSummaryByFunds(funds: MPFFund[]): Promise<MPFFundSummary[]> {
 
         console.debug("sending request ");
 
@@ -106,9 +106,7 @@ export class MPFService {
                         return true;
                 }
             })
-            .map(catalog => {
-                return catalog.fund;
-            });
+            .map(catalog => catalog.fund);
 
             console.log("getSummaryByCategories() - funds = " + JSON.stringify(funds));
 
@@ -173,7 +171,10 @@ export class MPFService {
 
             await this.initalizeCatalog();
 
-            let funds: MPFFund[] = this.mpfCatalog.map((item:MPFCatalog) => {
+            let funds: MPFFund[] = 
+            this.mpfCatalog
+            .filter(item => item.fund.trustee === trustee)
+            .map(item => {
                 return item.fund;
             });
 
@@ -187,25 +188,13 @@ export class MPFService {
 
     async getFunds(trustee: string, scheme: string): Promise<MPFFund[]> {
         console.debug("trustee: " + trustee + ", scheme: " + scheme);
-
-        // let urlPathArray = new Array<String>()
-        // urlPathArray.push(trustee);
-        // urlPathArray.push("schemes");
-        // urlPathArray.push(scheme);
-        // urlPathArray.push("funds");
-        // let urlPath = urlPathArray.join("/");   
-        
         try {
-            // const response: any = await this.httpGet(urlPath);
-            // return this.formatFundListResult(response.data.Items);
-
 
             await this.initalizeCatalog();
-            let funds: MPFFund[] = this.mpfCatalog
+            let funds: MPFFund[] = 
+            this.mpfCatalog
             .filter(item => (item.fund.trustee === trustee && item.fund.scheme === scheme))
-            .map(item => {
-                return item.fund
-            });
+            .map(item => item.fund );
 
             return funds;
 
@@ -217,9 +206,6 @@ export class MPFService {
 
     async getCategories(): Promise<string[]> {
         try {
-            // const response: any = await this.httpGet("category");
-            // console.log(response);
-            // return response.data;
             await this.getCatalog();
             let categories = new Set<string>();
             this.mpfCatalog.forEach(item => {
@@ -243,9 +229,8 @@ export class MPFService {
             let catalogList: MPFCatalog[] = response.data.map((item: any) => {
 
                 let categories = item.category.split(",");
-                categories = categories.map((item:string) => {
-                    return item.trim();
-                })
+                categories = categories.map((item:string) => item.trim());
+
                 return ({
                     fund: {trustee: item.trustee, scheme: item.scheme, fund: item.fund},
                     categories: categories
