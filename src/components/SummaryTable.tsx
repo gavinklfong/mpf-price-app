@@ -16,6 +16,7 @@ export interface Row {
 const formatterOption = {
     style: 'percent',
     signDisplay: 'exceptZero',
+    minimumFractionDigits: 2
  };
 const PercentFormatter = Intl.NumberFormat("en-US", formatterOption);
 
@@ -54,54 +55,54 @@ const conditionalRowStyles = [
 
 
 const columns = [
-    {
-      name: 'Trustee',
-      selector: 'trustee',
-      sortable: true,
-      left: true,
-      width: '60px'
-    },
+    // {
+    //   name: 'Trustee',
+    //   selector: 'trustee',
+    //   sortable: true,
+    //   left: true,
+    //   width: '60px'
+    // },
     {
       name: 'Fund',
       selector: 'fund',
       sortable: true,
       left: true,
-      width: '150px'
+      width: '300px'
     },
     {
-      name: '12 Months',
+      name: '12 M',
       selector: 'mth12',
       sortable: true,
       center: true,
       compact: true,
-      width: '80px',
+      width: '70px',
       cell: (row: Row) => formatCell(row.mth12)
     },
     {
-      name: '6 Months',
+      name: '6 M',
       selector: 'mth6',
       sortable: true,
       center: true,
       compact: true,
-      width: '80px',
+      width: '70px',
       cell: (row: Row) => formatCell(row.mth6)
     },
     {
-      name: '3 Months',
+      name: '3 M',
       selector: 'mth3',
       sortable: true,
       center: true,
       compact: true,
-      width: '80px',
+      width: '70px',
       cell: (row: Row) => formatCell(row.mth3)
     },
     {
-      name: '1 Months',
+      name: '1 M',
       selector: 'mth1',
       sortable: true,
       center: true,
       compact: true,
-      width: '80px',
+      width: '70px',
       cell: (row: Row) => formatCell(row.mth1)
     },
   ];
@@ -116,12 +117,14 @@ const columns = [
       style: {
         paddingLeft: '5px', // override the cell padding for head cells
         paddingRight: '5px',
+        fontSize: 'medium'
       },
     },
     cells: {
       style: {
         paddingLeft: '5px', // override the cell padding for data cells
         paddingRight: '5px',
+        fontSize: 'medium'
       },
     },
   };
@@ -131,6 +134,7 @@ const paginationServerOptions = { persistSelectedOnPageChange: false, persistSel
 
 interface Props {
     data: Row[];
+    progressPending: boolean
 }
 
 const SummaryTable: React.FC<Props> = (props) => {
@@ -143,6 +147,8 @@ const SummaryTable: React.FC<Props> = (props) => {
         paginationServerOptions={paginationServerOptions}
         customStyles={customStyles}
         noHeader={true}
+        fixedHeader={true}
+        progressPending={props.progressPending}
       />
     )
 }
