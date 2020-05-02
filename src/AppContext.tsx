@@ -10,6 +10,7 @@ export interface ServiceContextModel {
 }
 export interface LoginSessionContextModel {
     loginId: string;
+    showLoading: boolean;
 }
 
 const INITIAL_SRV_CONTEXT: ServiceContextModel = {
@@ -17,7 +18,8 @@ const INITIAL_SRV_CONTEXT: ServiceContextModel = {
 }
 
 const INITIAL_LOGIN_SESSION_CONTEXT: LoginSessionContextModel = {
-    loginId: ""
+    loginId: "",
+    showLoading: false
 }
 
 export const initializeServiceContext = (loginSession: LoginSessionContextModel, updateLoginSession: Dispatch<SetStateAction<LoginSessionContextModel>>): ServiceContextModel => {
@@ -45,7 +47,8 @@ export const initializeLoginSessionContext = (): LoginSessionContextModel => {
     // let loginId = authService.getCurrentLoginId();
 
     return {
-        loginId: ""
+        loginId: "",
+        showLoading: false
         
     }
 }
@@ -54,7 +57,8 @@ export const createServiceContext = () => React.createContext(INITIAL_SRV_CONTEX
 
 export const createLoginSessionContext = () => React.createContext({
     loginSession: INITIAL_LOGIN_SESSION_CONTEXT,
-    updateLoginSession: (model:LoginSessionContextModel) => {}
+    updateLoginSession: (model:LoginSessionContextModel) => {},
+    // setShowLoading: (showLoading:boolean) => {}
 });
 
 export const ServiceContext = createServiceContext();

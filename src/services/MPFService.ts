@@ -113,7 +113,7 @@ export class MPFService {
             const response: any = await this.httpPost("performance", JSON.stringify(funds));
             // console.log("getSummary() - response = " + JSON.stringify(response));
             let formattedResponse = this.formatFundSummaryResult(response.data);
-            console.log("getSummaryByCategories() - formattedResponse = " + JSON.stringify(formattedResponse));
+            // console.log("getSummaryByCategories() - formattedResponse = " + JSON.stringify(formattedResponse));
             return formattedResponse;
         } catch (e) {
             console.error(e);

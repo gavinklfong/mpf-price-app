@@ -18,7 +18,6 @@ const Login: React.FC = () => {
 
   const history = useHistory();
   const location = useLocation();
-  const [showLoading, setShowLoading] = useState(false);
 
   const {loginSession, updateLoginSession} = useContext(LoginSessionContext);
   
@@ -27,35 +26,47 @@ const Login: React.FC = () => {
   let initialLoginId = loginSession.loginId;
   const [loginForm, setLoginForm] = useState<LoginForm>({loginId: "gavin_fong@yahoo.com", password: "123456"});
 
-  let from  = location.state || { from: { pathname: "/" }  };
-  console.log("Login Page: from=" + from);
-  console.log(from);
+  let from: any  = location.state || { from: { pathname: "/" }  };
+  console.log("Login Page: from=" + JSON.stringify(from));
+  // console.log(from);
+
+  useEffect(() => {
+
+    console.log("Login - useEffect() - loginSession.loginId = " + loginSession.loginId + ", from = " + from.from.pathname);
+
+    if (loginSession.loginId == null || loginSession.loginId === "")
+      return;
+
+    history.push(from.from.pathname);
+
+  }, [loginSession.loginId]);
 
   const submitForLogin = async () => {
 
-    setShowLoading(true);
+    // setShowLoading(true);
+    updateLoginSession({...loginSession, showLoading: true});
 
     try {
       let signInResult = await authService.signInWithEmailAndPassword(loginForm.loginId, loginForm.password);
       console.log(signInResult.user.email);
-      updateLoginSession({loginId: signInResult.user.email});
-      history.push("/page/Summary");
+      setTimeout(() => { history.push(from.pathname) }, 500)
+      updateLoginSession({...loginSession, loginId: signInResult.user.email});
 
 
     } catch (error) {
 
       await authService.signOut();
-      updateLoginSession({loginId: ""});
+      updateLoginSession({...loginSession, loginId: ""});
 
       let errorCode = error.code;
       let errorMessage = error.message;
       console.log("Firebase auth - errorCode = " + errorCode);
       console.log("Firebase auth - errorMessage = " + errorMessage);
     } finally {
-      setShowLoading(false);
+      // setShowLoading(false);
+      updateLoginSession({...loginSession, showLoading: false});
+
     }
-
-
   }
 
   const handleInputChange = (e: any) => {
@@ -91,11 +102,6 @@ const Login: React.FC = () => {
         </IonList>
         <IonButton expand="block" onClick={e => submitForLogin()}>Login</IonButton>
       </IonContent>
-      <IonLoading
-        isOpen={showLoading}
-        onDidDismiss={() => setShowLoading(false)}
-        message={'Please wait...'}
-      />
     </IonPage>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Redirect, Route } from 'react-router-dom';
-import { IonApp, IonRouterOutlet, IonSplitPane } from '@ionic/react';
+import { IonApp, IonRouterOutlet, IonSplitPane, IonLoading } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { apps, flash, send, trendingUp, search } from 'ionicons/icons';
 
@@ -61,6 +61,11 @@ const App: React.FC = () => {
             </IonRouterOutlet>
           </IonSplitPane>
         </IonReactRouter>
+        <IonLoading
+        isOpen={contextInitialization.loginSession.showLoading}
+        onDidDismiss={() => contextInitialization.updateLoginSession({...contextInitialization.loginSession, showLoading: false})}
+        message={'Please wait...'}
+      />
       </IonApp>
       </ErrorBoundary>
       </LoginSessionContextProvider>
