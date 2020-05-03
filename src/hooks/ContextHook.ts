@@ -28,10 +28,12 @@ export interface AppContextInitialization {
 export const useAppContextInitialization = (): AppContextInitialization => {
     const [loginSession, updateLoginSession]= useState<LoginSessionContextModel>(initializeLoginSessionContext());
     const loginSessionContextValue = {loginSession, updateLoginSession};
-    const serviceContext = initializeServiceContext(loginSession, updateLoginSession);
+    const initialServiceContext = initializeServiceContext(loginSession, updateLoginSession);
+    const authService: AuthService = initialServiceContext.services.get("authService");
+    const mpfService: MPFService = initialServiceContext.services.get("mpfService");
 
-    const authService: AuthService = serviceContext.services.get("authService");
-    const mpfService: MPFService = serviceContext.services.get("mpfService");
+    const [serviceContext, updateServiceSession] = useState<ServiceContextModel>(initialServiceContext);
+
 
     useEffect(() => {
 
@@ -40,15 +42,19 @@ export const useAppContextInitialization = (): AppContextInitialization => {
         console.log("onAuthStateChange() - user = " + JSON.stringify(user));
 
         if (user != null && user.email != null)
-            updateLoginSession({...loginSession, loginId: user.email});
+            updateLoginSession((loginSession:any) => ({...loginSession, loginId: user.email}));
       });
   
     }, []);
 
     useEffect(() => {
   
-        if (loginSession.loginId != null && loginSession.loginId.length > 0)
+        if (loginSession.loginId != null && loginSession.loginId.length > 0) {
           mpfService.initialize();
+          serviceContext.services.set("mpfService", mpfService);
+          updateServiceSession(serviceContext);  
+        }
+
     
       }, [loginSession.loginId]);
 

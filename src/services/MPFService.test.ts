@@ -1,9 +1,17 @@
 import { MPFService, MPFFundPrice, MPFFund } from './MPFService'
+import { AuthService } from './AuthService';
+import { ConfigService } from './ConfigService';
 import axios, {AxiosRequestConfig} from 'axios';
 
 jest.mock('axios');
 const mockAxios = axios as jest.Mocked<typeof axios>;
 
+jest.mock('./AuthService');
+const authService = AuthService as jest.Mocked<typeof AuthService>;
+
+jest.mock('./ConfigService');
+const configService = ConfigService as jest.Mocked<typeof ConfigService>;
+configService.getProperty.mockResolvedValue("test");
 
 it('getFundPrices', async () => {
 
@@ -11,8 +19,7 @@ it('getFundPrices', async () => {
 
     mockAxios.get.mockResolvedValue(mockFundPriceResp);
 
-
-    let mpfService = new MPFService();
+    let mpfService = new MPFService(authService, configService);
 
     let query =  {
         trustee: "HSBC",

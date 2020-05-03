@@ -52,7 +52,9 @@ export const initializeLoginSessionContext = (): LoginSessionContextModel => {
     }
 }
 
-export const createServiceContext = () => React.createContext(INITIAL_SRV_CONTEXT);
+export const createServiceContext = () => React.createContext(
+    INITIAL_SRV_CONTEXT
+);
 
 export const createLoginSessionContext = () => React.createContext({
     loginSession: INITIAL_LOGIN_SESSION_CONTEXT,

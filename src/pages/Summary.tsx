@@ -15,7 +15,7 @@ const Summary: React.FC = () => {
 
     const {name, value} = e.target
     if (!!value && typeof value !== "undefined" && value.length > 0) {
-      setSummaryPageModel({...summaryPageModel, selectedCategory: value});
+      setSummaryPageModel(summaryPageModel => ({...summaryPageModel, selectedCategory: value}));
     }
   }
 

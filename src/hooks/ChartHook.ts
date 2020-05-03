@@ -116,6 +116,7 @@ export const useChart = () : [ChartModel, Dispatch<SetStateAction<ChartModel>>] 
         
         if (stringHasValue(chartModel.scheme) && arrayHasValue(chartModel.fundRecords)) {
             let fundList = chartModel.fundRecords!.filter(item => item.scheme === chartModel.scheme).map(item => item.fund);
+            console.debug("useEffect([chartModel.scheme]) - fundList = " + JSON.stringify(fundList));
             if (arrayHasValue(chartModel.schemeList)) {
                 let fund = [fundList[0]];
                 setChartModel(chartModel => ({...chartModel, fundList: fundList, funds: fund, selectedFundText: fundList[0]}));  
@@ -128,7 +129,7 @@ export const useChart = () : [ChartModel, Dispatch<SetStateAction<ChartModel>>] 
 
         (async() => {
 
-        updateLoginSession({...loginSession, showLoading: true});
+        updateLoginSession((loginSession:any) => ({...loginSession, showLoading: true}));
     
         console.debug("useEffect() - fundSelected() - [" + chartModel.funds + "]");
 
@@ -154,7 +155,7 @@ export const useChart = () : [ChartModel, Dispatch<SetStateAction<ChartModel>>] 
             let retrievedFundPrices = await mpfService.getFundPrices(fundPriceQuery);
 
             retrievedFundPrices.forEach(item => {
-                console.debug("retrieved fund price item: " + JSON.stringify(item));
+                // console.debug("retrieved fund price item: " + JSON.stringify(item));
                 fundPriceMap.set({trustee: item.trustee, scheme: item.scheme, fund: item.fund}, item);
             });
 

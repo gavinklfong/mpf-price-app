@@ -46,16 +46,16 @@ const Login: React.FC = () => {
   const submitForLogin = async () => {
 
     // setShowLoading(true);
-    updateLoginSession({...loginSession, showLoading: true});
+    updateLoginSession((loginSession:any) => ({...loginSession, showLoading: true}));
 
     try {
       let signInResult = await authService.signInWithEmailAndPassword(loginForm.loginId, loginForm.password);
       console.log(signInResult.user.email);
-      updateLoginSession({...loginSession, loginId: signInResult.user.email});
+      updateLoginSession((loginSession:any) => ({...loginSession, loginId: signInResult.user.email}));
     } catch (error) {
 
       await authService.signOut();
-      updateLoginSession({...loginSession, loginId: ""});
+      updateLoginSession((loginSession:any) => ({...loginSession, loginId: ""}));
 
       let errorCode = error.code;
       let errorMessage = error.message;
@@ -63,7 +63,7 @@ const Login: React.FC = () => {
       console.log("Firebase auth - errorMessage = " + errorMessage);
     } finally {
       // setShowLoading(false);
-      updateLoginSession({...loginSession, showLoading: false});
+      updateLoginSession((loginSession:any) => ({...loginSession, showLoading: false}));
 
     }
   }

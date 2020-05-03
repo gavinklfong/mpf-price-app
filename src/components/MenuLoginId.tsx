@@ -23,7 +23,7 @@ const MenuLoginId: React.FC<LoginIdProps> = (props) => {
 
   const signout = async () => {
     await authService.signOut();
-    updateLoginSession({...loginSession, loginId: ""});
+    updateLoginSession((loginSession:any) => ({...loginSession, loginId: ""}));
   }
 
   return (

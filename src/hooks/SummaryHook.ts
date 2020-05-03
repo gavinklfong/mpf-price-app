@@ -46,7 +46,7 @@ export const useSummary = () : [SummaryModel, Dispatch<SetStateAction<SummaryMod
 
     // temporary fix on show loading issue
     useIonViewWillEnter(() => {
-        updateLoginSession({...loginSession, showLoading: false});
+        updateLoginSession((loginSession:any) => ({...loginSession, showLoading: false}));
     });
 
     useEffect(() => {
@@ -62,7 +62,7 @@ export const useSummary = () : [SummaryModel, Dispatch<SetStateAction<SummaryMod
 
         (async () => {
 
-            updateLoginSession({...loginSession, showLoading: true});
+            updateLoginSession((loginSession:any) => ({...loginSession, showLoading: true}));
             setPending(true);
             let selectedCategories = [];
             if (summaryPageModel.selectedCategory === ALL_CATEGORY_ITEM)
@@ -73,7 +73,7 @@ export const useSummary = () : [SummaryModel, Dispatch<SetStateAction<SummaryMod
             let result = await mpfService.getSummaryByCategories(selectedCategories);
             const rows = formatTableRowData(result);
             setSummaryPageModel(summaryPageModel => ({...summaryPageModel, tableRows: rows}));
-            updateLoginSession({...loginSession, showLoading: false});
+            updateLoginSession((loginSession:any) => ({...loginSession, showLoading: false}));
             setPending(false);
         })();
 

@@ -47,7 +47,7 @@ const Chart: React.FC = () => {
             selectedFundText = "Multiple Funds";
         }
         
-         setChartModel({...chartModel, funds: values, selectedFundText: selectedFundText});
+         setChartModel(chartModel => ({...chartModel, funds: values, selectedFundText: selectedFundText}));
       }
   
   }
@@ -58,7 +58,7 @@ const Chart: React.FC = () => {
 
       const {name, value} = e.target
       if (!!value && typeof value !== "undefined" && value.length > 0) {
-         setChartModel({...chartModel, [name]: value})
+         setChartModel(chartModel => ({...chartModel, [name]: value}))
       }
   }
 
@@ -69,7 +69,7 @@ const Chart: React.FC = () => {
       const {name, value} = e.target
       if (!!value && typeof value !== "undefined") {
          let numberVal = +value;
-         setChartModel({...chartModel, [name]: numberVal})
+         setChartModel(chartModel => ({...chartModel, [name]: numberVal}));
       }   
    }
 
@@ -80,7 +80,7 @@ const Chart: React.FC = () => {
       const {name, checked} = e.target
       if (checked != null && typeof checked !== "undefined") {
          let booleanVal = Boolean(checked);
-         setChartModel({...chartModel, [name]: checked})
+         setChartModel(chartModel => ({...chartModel, [name]: checked}));
       }   
    }
 
@@ -90,7 +90,7 @@ const Chart: React.FC = () => {
 
       const {name, value} = e.target
       if (!!value && typeof value !== "undefined" && value.length > 0) {
-         setChartModel({...chartModel, timePeriod: value})
+         setChartModel(chartModel => ({...chartModel, timePeriod: value}));
       }   
   }
    
@@ -152,11 +152,13 @@ const Chart: React.FC = () => {
             name="fund"
             selectedText={chartModel.selectedFundText} value={chartModel.funds} 
             onIonChange={handleFundSelectionChange} >
-              { chartModel.fundList!.map((item: string) => {
-                return (
-                  <IonSelectOption key={item} value={item}>{item}</IonSelectOption>
-                );
-              })}
+              {
+                chartModel.fundList!.map(item => {
+                  return (
+                    <IonSelectOption key={item} value={item}>{item}</IonSelectOption>
+                  );
+                })
+              }
             </IonSelect>
           </IonItem>  
           <IonItem>
