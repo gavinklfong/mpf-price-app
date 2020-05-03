@@ -53,6 +53,8 @@ export class MPFService {
 
     private mpfCatalog: MPFCatalog[] = [];
 
+    private initializationInvokingCount = 0;
+
     private constructor() { }
 
     static getInstance() {
@@ -63,22 +65,53 @@ export class MPFService {
         return MPFService.instance;
     }
 
-    async initialize(force = false) {
-            
-        console.log("MPFService.initialize() - " + force);
+    async initialize(force = false): Promise<void> {
+        
+        const promise = new Promise<void>(async (resolve: any, reject: any) => {
+            try {
+                await this.initializeInternal(force, resolve, reject);
+            } catch (e) {
+                reject();
+            }
+        });
 
-        if (!this.apiEndpoint || force) {
-            this.apiEndpoint = await this.configService.getProperty("app/api/endpoint");
-            console.log("MPFService() - Initialize API Endpoint = " + this.apiEndpoint);
-        }
-        if (!this.apiKey || force) { 
-            this.apiKey = await this.configService.getProperty("app/api/key");
-            console.log("MPFService() - Initialize API Key");
+        return promise;
+
+    }
+
+    async initializeInternal(force = false, resolve: () => {}, reject: () => {}) {
+
+        if (this.initializationInvokingCount > 0) {
+            setTimeout(() => { this.initializeInternal(force, resolve, reject) }, 500);
+            return;
         }
 
-        if (this.mpfCatalog.length === 0 || force) { 
-            await this.initalizeCatalog();
-            console.log("MPFService() - Initialize MPF Catalog");
+        this.initializationInvokingCount++;
+        console.log("MPFService.initializeInternal() - start - count = " +  this.initializationInvokingCount);    
+        
+        try {
+            if (!this.apiEndpoint || force) {
+                this.apiEndpoint = await this.configService.getProperty("app/api/endpoint");
+                console.log("MPFService() - Initialize API Endpoint = " + this.apiEndpoint);
+            }
+            if (!this.apiKey || force) { 
+                this.apiKey = await this.configService.getProperty("app/api/key");
+                console.log("MPFService() - Initialize API Key");
+            }
+
+            if (this.mpfCatalog.length === 0 || force) { 
+                await this.initalizeCatalog();
+                console.log("MPFService() - Initialize MPF Catalog");
+            }
+
+            resolve();
+
+        } catch (e) {
+            reject();
+        } finally {
+            this.initializationInvokingCount--;
+            if (this.initializationInvokingCount < 0) this.initializationInvokingCount = 0;
+            console.log("MPFService.initializeInternal() - finish - count = " +  this.initializationInvokingCount);    
         }
 
     }
