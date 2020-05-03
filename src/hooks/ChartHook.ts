@@ -1,10 +1,7 @@
 import moment from 'moment';
-import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
+import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import {
-    useIonViewDidEnter,
-    useIonViewDidLeave,
     useIonViewWillEnter,
-    useIonViewWillLeave
   } from '@ionic/react';
 import { ChartDataPoint, ChartDataset }  from '../components/ChartComponent';
 import { MPFService, MPFFundPrice, MPFFund, FundPrice, MPFFundPriceQuery } from '../services/MPFService';
@@ -55,7 +52,7 @@ export const useChart = () : [ChartModel, Dispatch<SetStateAction<ChartModel>>] 
         });
 
 
-    let {loginSession, updateLoginSession} = useAppContext();
+    let {updateLoginSession} = useAppContext();
 
     const mpfService: MPFService = ServiceFactory.getMPFService();
 
@@ -110,7 +107,7 @@ export const useChart = () : [ChartModel, Dispatch<SetStateAction<ChartModel>>] 
 
         run();
 
-    }, [chartModel.trustee]);
+    }, [chartModel.trustee, mpfService]);
 
     useEffect(() => {
 
@@ -125,7 +122,7 @@ export const useChart = () : [ChartModel, Dispatch<SetStateAction<ChartModel>>] 
             }
         }
 
-    }, [chartModel.scheme]);
+    }, [chartModel.scheme, chartModel.fundRecords, chartModel.schemeList]);
 
     useEffect(() => {
 
@@ -167,7 +164,7 @@ export const useChart = () : [ChartModel, Dispatch<SetStateAction<ChartModel>>] 
         }
         })();
 
-    }, [chartModel.funds, chartModel.timePeriod, chartModel.queryTimeRange]);
+    }, [chartModel.funds, chartModel.timePeriod, chartModel.queryTimeRange, chartModel.scheme, chartModel.trustee, mpfService, updateLoginSession]);
 
     useEffect(() => { 
 

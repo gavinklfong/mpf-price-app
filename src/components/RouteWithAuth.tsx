@@ -1,11 +1,11 @@
-import React, { Component, ReactNode, ComponentType, useContext } from 'react';
+import React, {useContext } from 'react';
 import { RouteProps } from 'react-router';
 import { useLocation, Redirect, Route } from 'react-router-dom';
 import { LoginSessionContext } from '../AppContext';
 
 export const RouteWithAuth: React.FC<RouteProps> = (props)  => {
         
-    const {loginSession, updateLoginSession} = useContext(LoginSessionContext);
+    const {loginSession } = useContext(LoginSessionContext);
     const userEmail = loginSession.loginId
 
     const location = useLocation();

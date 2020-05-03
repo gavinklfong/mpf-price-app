@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Redirect, Route } from 'react-router-dom';
 import { IonApp, IonRouterOutlet, IonSplitPane, IonLoading } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import { apps, flash, send, trendingUp, search } from 'ionicons/icons';
 
-import { LoginSessionContextProvider, initializeLoginSessionContext, LoginSessionContextModel}  from './AppContext';
+import { LoginSessionContextProvider }  from './AppContext';
 import { useAppContextInitialization } from './hooks/ContextHook';
 
 import Menu from './components/Menu';

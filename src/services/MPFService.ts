@@ -1,8 +1,6 @@
 import axios, {AxiosRequestConfig} from 'axios';
-import moment from 'moment';
 import { AuthService } from './AuthService';
 import { ConfigService } from './ConfigService';
-import { pathToFileURL } from 'url';
 
 export interface MPFFundPriceQuery {
     startDate: number;
@@ -50,15 +48,10 @@ export class MPFService {
     private authService = AuthService.getInstance();
     private configService = ConfigService.getInstance();
 
-    // private authService: AuthService | null = null;
-    // private configService: ConfigService | null = null;
-
     private apiEndpoint = "";
     private apiKey = "";
 
     private mpfCatalog: MPFCatalog[] = [];
-
-    private initializationInProgressCount = 0;
 
     private constructor() { }
 
@@ -71,17 +64,8 @@ export class MPFService {
     }
 
     async initialize(force = false) {
-
-        // this.initializationInProgressCount++;
-        // if (this.initializationInProgressCount > 1) {
-        //     setTimeout(() => { this.initialize(force) }, 1000);
-        //     return;
-        // }
             
         console.log("MPFService.initialize() - " + force);
-
-        // if (!this.isInitializationInProgress) this.isInitializationInProgress = true;
-        // else setTimeout(() => { this.initialize(force) }, 1000);
 
         if (!this.apiEndpoint || force) {
             this.apiEndpoint = await this.configService.getProperty("app/api/endpoint");
@@ -92,17 +76,15 @@ export class MPFService {
             console.log("MPFService() - Initialize API Key");
         }
 
-        if (this.mpfCatalog.length == 0 || force) { 
+        if (this.mpfCatalog.length === 0 || force) { 
             await this.initalizeCatalog();
             console.log("MPFService() - Initialize MPF Catalog");
         }
 
-        // this.initializationInProgressCount--;
-
     }
 
     private async initalizeCatalog() {
-        if (this.mpfCatalog == null || this.mpfCatalog.length == 0)
+        if (this.mpfCatalog === null || this.mpfCatalog.length === 0)
             this.mpfCatalog = await this.getCatalog();
     }
 
@@ -349,7 +331,7 @@ export class MPFService {
 
     private formatFundPriceResult(result: any) : Array<MPFFundPrice> {
 
-        let formattedResult : Array<MPFFundPrice> = new Array();
+        let formattedResult : Array<MPFFundPrice> = [];
 
         formattedResult = result.map( (item : any) => {
 
@@ -380,7 +362,7 @@ export class MPFService {
 
     private formatFundSummaryResult(result: any) : Array<MPFFundSummary> {
 
-        let formattedResult : Array<MPFFundSummary> = new Array();
+        let formattedResult : Array<MPFFundSummary> = [];
 
         formattedResult = result.map( (item : any) => {
 
@@ -406,20 +388,6 @@ export class MPFService {
         return formattedResult;
     }
 
-    private formatFundListResult(result: any) : Array<MPFFund> {
-
-        let formattedResult : Array<MPFFund> = new Array();
-
-        formattedResult = result.map( (item : any) => {
-            return {
-                trustee: item.trustee,
-                scheme: item.scheme,
-                fund: item.fund
-            }
-        });
-
-        return formattedResult;
-    }
 
 }
 

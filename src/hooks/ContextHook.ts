@@ -1,7 +1,6 @@
 
-import React, { useState, useEffect, Dispatch, SetStateAction, useContext} from 'react';
+import { useState, useEffect, Dispatch, SetStateAction, useContext} from 'react';
 import { LoginSessionContext } from '../AppContext';
-import { useHistory, useLocation } from "react-router-dom";
 import { ServiceFactory } from '../services/ServiceFactory';
 import { AuthService } from '../services/AuthService';
 import { MPFService } from '../services/MPFService';
@@ -29,8 +28,6 @@ export interface AppContextInitialization {
 }
 export const useAppContextInitialization = (): AppContextInitialization => {
     const [loginSession, updateLoginSession]= useState<LoginSessionContextModel>(initializeLoginSessionContext());
-    const loginSessionContextValue = {loginSession, updateLoginSession};
-
     const authService: AuthService = ServiceFactory.getAuthService();
     const mpfService: MPFService = ServiceFactory.getMPFService();
     
@@ -45,7 +42,7 @@ export const useAppContextInitialization = (): AppContextInitialization => {
             updateLoginSession((loginSession:any) => ({...loginSession, loginId: user.email}));
       });
   
-    }, []);
+    }, [authService]);
 
     useEffect(() => {
   
@@ -56,7 +53,7 @@ export const useAppContextInitialization = (): AppContextInitialization => {
         }
 
     
-      }, [loginSession.loginId]);
+      }, [loginSession.loginId, mpfService]);
 
 
     return {loginSession, updateLoginSession};

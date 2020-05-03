@@ -1,9 +1,6 @@
-import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
+import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import {
-    useIonViewDidEnter,
-    useIonViewDidLeave,
     useIonViewWillEnter,
-    useIonViewWillLeave
   } from '@ionic/react';
 import { useAppContext } from './ContextHook';
 import { MPFService, MPFFundSummary } from '../services/MPFService';
@@ -25,7 +22,7 @@ export const useSummary = () : [SummaryModel, Dispatch<SetStateAction<SummaryMod
     const initialSummaryPageModel = {selectedCategory: ALL_CATEGORY_ITEM, categoryList: [ALL_CATEGORY_ITEM], tableRows: []};
     const [summaryPageModel, setSummaryPageModel] = useState<SummaryModel>(initialSummaryPageModel);
 
-    const {loginSession, updateLoginSession} = useAppContext();
+    const { updateLoginSession} = useAppContext();
 
     const mpfService: MPFService = ServiceFactory.getMPFService();
 
@@ -57,7 +54,7 @@ export const useSummary = () : [SummaryModel, Dispatch<SetStateAction<SummaryMod
           console.log("useSummary() - get category list = " + JSON.stringify(result));
           setSummaryPageModel(summaryPageModel => ({...summaryPageModel, categoryList: result}));
         })();
-    }, []);
+    }, [mpfService]);
 
     useEffect(() => {
 
@@ -78,7 +75,7 @@ export const useSummary = () : [SummaryModel, Dispatch<SetStateAction<SummaryMod
             setPending(false);
         })();
 
-  }, [summaryPageModel.selectedCategory]);
+  }, [summaryPageModel.selectedCategory, mpfService, updateLoginSession]);
 
   return [summaryPageModel, setSummaryPageModel, pending];
 

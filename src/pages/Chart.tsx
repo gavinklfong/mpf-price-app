@@ -11,22 +11,17 @@ import {
   IonToolbar,
   IonSelect,
   IonSelectOption,
-  IonLoading,
   IonRange,
   IonToggle,
   IonButtons,
   IonSegment,
   IonSegmentButton,
   IonMenuButton,
-  useIonViewDidEnter,
-  useIonViewDidLeave,
-  useIonViewWillEnter,
-  useIonViewWillLeave
 } from '@ionic/react';
-import React, { useState, Dispatch, SetStateAction } from 'react';
+import React, { useState } from 'react';
 import './Chart.css';
 import ChartComponent from '../components/ChartComponent';
-import { useChart, ChartModel } from '../hooks/ChartHook';
+import { useChart } from '../hooks/ChartHook';
 import Collapsible from 'react-collapsible';
 
 const Chart: React.FC = () => {
