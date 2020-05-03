@@ -5,9 +5,10 @@ import {
     useIonViewWillEnter,
     useIonViewWillLeave
   } from '@ionic/react';
-import { useService, useAppContext } from './ContextHook';
+import { useAppContext } from './ContextHook';
 import { MPFService, MPFFundSummary } from '../services/MPFService';
 import { Row } from '../components/SummaryTable';
+import { ServiceFactory } from '../services/ServiceFactory';
 
 export interface SummaryModel {
     selectedCategory: string;
@@ -26,7 +27,7 @@ export const useSummary = () : [SummaryModel, Dispatch<SetStateAction<SummaryMod
 
     const {loginSession, updateLoginSession} = useAppContext();
 
-    const mpfService: MPFService = useService("mpfService");
+    const mpfService: MPFService = ServiceFactory.getMPFService();
 
     const formatTableRowData = (rows:MPFFundSummary[]):Row[] => {
         const result = rows.map(item => {

@@ -1,17 +1,25 @@
+import { getFirebaseInstance } from './FirebaseService';
 import * as firebase from 'firebase/app';
 import 'firebase/auth';
-import { FirebaseService } from './FirebaseService';
-
 
 export class AuthService {
 
+    private static instance: AuthService;
+
     firebase:any;
 
-    constructor(firebaseService: FirebaseService) {
-        this.firebase  = firebaseService.firebase;
+    private constructor() { 
+        this.firebase = getFirebaseInstance();
+    }
+
+    static getInstance() {
+        if (!AuthService.instance) {
+            AuthService.instance = new AuthService();
+        }
+
+        return AuthService.instance;
     }
     
-
     async signInWithEmailAndPassword(userId:string, password:string): Promise<any> {
         
         await this.signOut();

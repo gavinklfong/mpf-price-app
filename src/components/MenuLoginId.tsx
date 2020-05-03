@@ -8,8 +8,9 @@ import React, { useState } from 'react';
 import Avatar from 'react-avatar';
 import './MenuLoginId.css';
 
-import { useService, useAppContext} from '../hooks/ContextHook';
+import { useAppContext} from '../hooks/ContextHook';
 import { AuthService } from '../services/AuthService';
+import { ServiceFactory } from '../services/ServiceFactory';
 
 
 export interface LoginIdProps {
@@ -18,7 +19,7 @@ export interface LoginIdProps {
 }
 const MenuLoginId: React.FC<LoginIdProps> = (props) => {
   const [showAlert, setShowAlert] = useState(false);
-  const authService: AuthService = useService("authService");
+  const authService: AuthService = ServiceFactory.getAuthService();
   const {loginSession, updateLoginSession} = useAppContext();
 
   const signout = async () => {

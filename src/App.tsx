@@ -4,7 +4,7 @@ import { IonApp, IonRouterOutlet, IonSplitPane, IonLoading } from '@ionic/react'
 import { IonReactRouter } from '@ionic/react-router';
 import { apps, flash, send, trendingUp, search } from 'ionicons/icons';
 
-import { LoginSessionContextProvider, ServiceContextProvider, initializeServiceContext, initializeLoginSessionContext, LoginSessionContextModel}  from './AppContext';
+import { LoginSessionContextProvider, initializeLoginSessionContext, LoginSessionContextModel}  from './AppContext';
 import { useAppContextInitialization } from './hooks/ContextHook';
 
 import Menu from './components/Menu';
@@ -44,7 +44,6 @@ const App: React.FC = () => {
   const contextInitialization = useAppContextInitialization();
   
   return (
-    <ServiceContextProvider value={contextInitialization.serviceContext}>
       <LoginSessionContextProvider value={{loginSession: contextInitialization.loginSession, updateLoginSession: contextInitialization.updateLoginSession}}>
       <ErrorBoundary>
       <IonApp>
@@ -67,7 +66,6 @@ const App: React.FC = () => {
       </IonApp>
       </ErrorBoundary>
       </LoginSessionContextProvider>
-    </ServiceContextProvider>
   );
 };
 

@@ -1,8 +1,9 @@
 import React, {useEffect, useState, useContext} from 'react';
 import { useHistory, useLocation } from "react-router-dom";
 import { IonButtons, IonMenuButton, IonContent, IonHeader, IonItem, IonLabel, IonList, IonPage, IonTitle, IonToolbar, IonInput, IonButton } from '@ionic/react';
-import { useService, useAppContext } from '../hooks/ContextHook';
+import { useAppContext } from '../hooks/ContextHook';
 import { AuthService } from '../services/AuthService';
+import { ServiceFactory } from '../services/ServiceFactory';
 
 import './Login.css';
 
@@ -18,7 +19,7 @@ const Login: React.FC = () => {
   const location = useLocation();
   const {loginSession, updateLoginSession} = useAppContext();
   
-  const authService: AuthService = useService("authService");
+  const authService: AuthService = ServiceFactory.getAuthService();
   
   let initialLoginId = loginSession.loginId;
   const [loginForm, setLoginForm] = useState<LoginForm>({loginId: "gavin_fong@yahoo.com", password: "123456"});

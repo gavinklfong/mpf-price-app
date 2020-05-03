@@ -8,7 +8,8 @@ import {
   } from '@ionic/react';
 import { ChartDataPoint, ChartDataset }  from '../components/ChartComponent';
 import { MPFService, MPFFundPrice, MPFFund, FundPrice, MPFFundPriceQuery } from '../services/MPFService';
-import { useService, useAppContext } from './ContextHook';
+import { useAppContext } from './ContextHook';
+import { ServiceFactory } from '../services/ServiceFactory';
 
 export interface ChartModel {
     trusteeList?: string[],
@@ -55,7 +56,8 @@ export const useChart = () : [ChartModel, Dispatch<SetStateAction<ChartModel>>] 
 
 
     let {loginSession, updateLoginSession} = useAppContext();
-    const mpfService: MPFService = useService("mpfService");
+
+    const mpfService: MPFService = ServiceFactory.getMPFService();
 
 
     useIonViewWillEnter(async () => {

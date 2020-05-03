@@ -1,18 +1,21 @@
 
 import React, { useState, useEffect, Dispatch, SetStateAction, useContext} from 'react';
-import { LoginSessionContext, ServiceContext, ServiceContextModel } from '../AppContext';
+import { LoginSessionContext } from '../AppContext';
 import { useHistory, useLocation } from "react-router-dom";
+import { ServiceFactory } from '../services/ServiceFactory';
 import { AuthService } from '../services/AuthService';
 import { MPFService } from '../services/MPFService';
-import { initializeLoginSessionContext, initializeServiceContext, LoginSessionContextModel } from '../AppContext';
+import { initializeLoginSessionContext, LoginSessionContextModel } from '../AppContext';
 
 
-export const useService = (serviceKey:string): any => {
-    const serviceContext = useContext(ServiceContext);
+// export const useService = (serviceKey:string): any => {
 
-    return serviceContext.services.get(serviceKey);
 
-}
+//     const serviceContext = useContext(ServiceContext);
+
+//     return serviceContext.services.get(serviceKey);
+
+// }
 
 
 export const useAppContext = (): any => {
@@ -23,17 +26,14 @@ export const useAppContext = (): any => {
 export interface AppContextInitialization {
     loginSession: LoginSessionContextModel;
     updateLoginSession: Dispatch<SetStateAction<LoginSessionContextModel>>;
-    serviceContext: ServiceContextModel;
 }
 export const useAppContextInitialization = (): AppContextInitialization => {
     const [loginSession, updateLoginSession]= useState<LoginSessionContextModel>(initializeLoginSessionContext());
     const loginSessionContextValue = {loginSession, updateLoginSession};
-    const initialServiceContext = initializeServiceContext(loginSession, updateLoginSession);
-    const authService: AuthService = initialServiceContext.services.get("authService");
-    const mpfService: MPFService = initialServiceContext.services.get("mpfService");
 
-    const [serviceContext, updateServiceSession] = useState<ServiceContextModel>(initialServiceContext);
-
+    const authService: AuthService = ServiceFactory.getAuthService();
+    const mpfService: MPFService = ServiceFactory.getMPFService();
+    
 
     useEffect(() => {
 
@@ -50,14 +50,14 @@ export const useAppContextInitialization = (): AppContextInitialization => {
     useEffect(() => {
   
         if (loginSession.loginId != null && loginSession.loginId.length > 0) {
-          mpfService.initialize();
-          serviceContext.services.set("mpfService", mpfService);
-          updateServiceSession(serviceContext);  
+          mpfService.initialize(true);
+          // serviceContext.services.set("mpfService", mpfService);
+          // updateServiceSession(serviceContext);  
         }
 
     
       }, [loginSession.loginId]);
 
 
-    return {loginSession, updateLoginSession, serviceContext};
+    return {loginSession, updateLoginSession};
 } 
