@@ -1,19 +1,8 @@
 
   import React, { useEffect, useRef } from 'react';
   import Chart from 'chart.js';
+  import { ChartDataPoint, ChartDataset } from '../models/ChartDiagramModel';
 
-
-  export interface ChartDataPoint {
-      x: string | number;
-      y: string | number;
-  }
-
-  export interface ChartDataset {
-      data: Array<ChartDataPoint>;
-      label?: string;
-      borderColor?: string;
-      fill?: boolean;
-  }
   
   export interface Props {
     type: string,
@@ -24,7 +13,7 @@
 
   let chart: any = null;
 
-  const ChartComponent: React.FC<Props> = ( props ) => {
+  const ChartDiagram: React.FC<Props> = ( props ) => {
 
     console.debug("ChartComponent render()");
     
@@ -96,4 +85,4 @@
     );
 };
 
-export default ChartComponent;
+export default ChartDiagram;

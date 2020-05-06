@@ -3,15 +3,11 @@ import {
     useIonViewWillEnter,
   } from '@ionic/react';
 import { useAppContext } from './ContextHook';
-import { MPFService, MPFFundSummary } from '../services/MPFService';
-import { Row } from '../components/SummaryTable';
+import { MPFFundSummary } from '../models/MPFFundModel';
+import { MPFService } from '../services/MPFService';
+import { Row, SummaryModel } from '../models/SummaryModel';
 import { ServiceFactory } from '../services/ServiceFactory';
 
-export interface SummaryModel {
-    selectedCategory: string;
-    categoryList: string[];
-    tableRows: Row[];
-}
 
 export const ALL_CATEGORY_ITEM = "-- All Categories --";
 

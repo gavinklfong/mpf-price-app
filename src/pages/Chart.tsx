@@ -1,4 +1,3 @@
-import moment from 'moment';
 import {
   IonCard,
   IonContent,
@@ -19,10 +18,11 @@ import {
   IonMenuButton,
 } from '@ionic/react';
 import React, { useState } from 'react';
-import './Chart.css';
-import ChartComponent from '../components/ChartComponent';
-import { useChart } from '../hooks/ChartHook';
+import ChartDiagram from '../components/ChartDiagram';
 import Collapsible from 'react-collapsible';
+import { useChart } from '../hooks/ChartHook';
+import './Chart.css';
+
 
 const Chart: React.FC = () => {
 
@@ -185,7 +185,7 @@ const Chart: React.FC = () => {
         </IonCard>
         </Collapsible>
         <IonCard>
-            <ChartComponent type="line" height={chartHeight} labels={chartModel.chartLabels!} datasets={chartModel.chartDatasets!} /> 
+            <ChartDiagram type="line" height={chartHeight} labels={chartModel.chartLabels!} datasets={chartModel.chartDatasets!} /> 
         </IonCard>
       </IonContent>
     </IonPage>

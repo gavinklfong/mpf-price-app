@@ -3,33 +3,12 @@ import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import {
     useIonViewWillEnter,
   } from '@ionic/react';
-import { ChartDataPoint, ChartDataset }  from '../components/ChartComponent';
-import { MPFService, MPFFundPrice, MPFFund, FundPrice, MPFFundPriceQuery } from '../services/MPFService';
+import { ChartDataPoint, ChartDataset }  from '../models/ChartDiagramModel';
+import { MPFService } from '../services/MPFService';
+import { MPFFundPrice, MPFFund, FundPrice, MPFFundPriceQuery } from '../models/MPFFundModel';
 import { useAppContext } from './ContextHook';
 import { ServiceFactory } from '../services/ServiceFactory';
-
-export interface ChartModel {
-    trusteeList?: string[],
-    schemeList?: string[],
-    fundList?: string[],
- 
-    trustee: string,
-    scheme: string,
-    funds?: string[],
-    selectedFundText: string,
- 
-    fundRecords?: MPFFund[]
- 
-    displayInPercent: boolean,
-    queryTimeRange: number,
-    timePeriod: string,
-    
-    fundPriceMap?: Map<MPFFund, MPFFundPrice>,
- 
-    chartDatasets?: ChartDataset[],
-    chartLabels?: string[]
- }
-
+import { ChartModel } from '../models/ChartModel';
 
 const randomNumber = (min:number, max:number) => Math.floor(Math.random() * (max - min + 1) + min);
 const randomByte = () => randomNumber(0, 255)
