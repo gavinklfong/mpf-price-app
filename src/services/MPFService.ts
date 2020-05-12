@@ -237,6 +237,7 @@ export class MPFService {
 
         try {
             const response: any = await this.httpGet("catalog");
+            // console.log(JSON.stringify(response));
             let catalogList: MPFCatalog[] = response.data.map((item: any) => {
 
                 let categories = item.category.split(",");

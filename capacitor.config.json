@@ -1,6 +1,6 @@
 {
-  "appId": "io.ionic.starter",
-  "appName": "mpf-price-app",
+  "appId": "gavinklfong.web.app",
+  "appName": "MPF Price App",
   "bundledWebRuntime": false,
   "npmClient": "npm",
   "webDir": "build",

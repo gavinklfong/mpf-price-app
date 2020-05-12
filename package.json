@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
-    "@capacitor/core": "2.0.1",
+    "@capacitor/android": "^2.1.0",
+    "@capacitor/core": "^2.0.1",
     "@ionic/react": "^5.0.7",
     "@ionic/react-router": "^5.0.7",
     "@reactivex/rxjs": "^6.5.4",
@@ -57,8 +58,9 @@
   },
   "description": "MPF Fund Price App",
   "devDependencies": {
-    "@capacitor/cli": "1.5.0",
+    "@capacitor/cli": "^1.5.0",
     "@ionic/eslint-plugin": "0.0.1",
+    "@ionic/react-test-utils": "0.0.3",
     "@percy/cypress": "^2.2.0",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.4.0",
