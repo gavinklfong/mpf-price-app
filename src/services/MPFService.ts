@@ -57,18 +57,20 @@ export class MPFService {
                 console.log("MPFService() - Initialize API Endpoint = " + this.apiEndpoint);
             }
             if (!this.apiKey || force) { 
-                this.apiKey = await this.configService.getProperty("app/api/key");
                 console.log("MPFService() - Initialize API Key");
+                this.apiKey = await this.configService.getProperty("app/api/key");
             }
 
             if (this.mpfCatalog.length === 0 || force) { 
-                await this.initalizeCatalog();
                 console.log("MPFService() - Initialize MPF Catalog");
+                await this.initalizeCatalog();
             }
 
             resolve();
 
         } catch (e) {
+            console.error("error occured during initialization - ");
+            console.error(e);
             reject();
         } finally {
             this.initializationInvokingCount--;
@@ -236,6 +238,7 @@ export class MPFService {
     async getCatalog(): Promise<MPFCatalog[]> {
 
         try {
+            console.log("getCatalog");
             const response: any = await this.httpGet("catalog");
             // console.log(JSON.stringify(response));
             let catalogList: MPFCatalog[] = response.data.map((item: any) => {
@@ -263,6 +266,7 @@ export class MPFService {
             await this.initialize();
         }
 
+        console.log("MPFService - httpGet()");
         const requestOptions: AxiosRequestConfig = await this.prepareRequestConfig({});
         const url = encodeURI(this.apiEndpoint + apiPath);
 
