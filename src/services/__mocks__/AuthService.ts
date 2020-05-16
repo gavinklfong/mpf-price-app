@@ -21,9 +21,9 @@ export class AuthService {
         return Promise.resolve();
     }
 
-    getCurrentLoginId():string  {
+    getCurrentLoginId = jest.fn(() => {
         return "currentUser";
-    }
+    })
 
     onAuthStateChange(handleAuthStateChange:any) { }
 

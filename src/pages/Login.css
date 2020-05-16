@@ -1,0 +1,6 @@
+/* fund selection pop up size */
+.alert-wrapper.sc-ion-alert-md {
+    --min-width: 80%;
+    --width: 80%;
+    --height: 20%;
+  }

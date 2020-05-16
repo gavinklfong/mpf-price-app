@@ -14,7 +14,7 @@ export const useLogin = () : [LoginFormModel, Dispatch<SetStateAction<LoginFormM
     const authService: AuthService = ServiceFactory.getAuthService();
     
     let initialLoginId = loginSession.loginId;
-    const [loginForm, setLoginForm] = useState<LoginFormModel>({loginId: "gavin_fong@yahoo.com", password: "123456"});
+    const [loginForm, setLoginForm] = useState<LoginFormModel>({loginId: "", password: "", alertMessage: "", showAlert: false});
   
     let from: any  = location.state;
     if (from == null || from.from == null) {
@@ -35,7 +35,7 @@ export const useLogin = () : [LoginFormModel, Dispatch<SetStateAction<LoginFormM
       history.push(from.from.pathname);
   
     }, [loginSession.loginId]);
-  
+
     const submitForLogin = async () => {
   
       // setShowLoading(true);
@@ -47,13 +47,19 @@ export const useLogin = () : [LoginFormModel, Dispatch<SetStateAction<LoginFormM
         updateLoginSession((loginSession:any) => ({...loginSession, loginId: signInResult.user.email}));
       } catch (error) {
   
+        setLoginForm((loginForm) => ({...loginForm, showAlert: true, alertMessage: "Incorrect login Id / password"}));
+
         await authService.signOut();
         updateLoginSession((loginSession:any) => ({...loginSession, loginId: ""}));
-  
+        
         let errorCode = error.code;
         let errorMessage = error.message;
         console.log("auth - errorCode = " + errorCode);
         console.log("auth - errorMessage = " + errorMessage);
+
+
+
+
       } finally {
         // setShowLoading(false);
         updateLoginSession((loginSession:any) => ({...loginSession, showLoading: false}));

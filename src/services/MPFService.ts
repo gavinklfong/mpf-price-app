@@ -1,14 +1,13 @@
 import axios, {AxiosRequestConfig} from 'axios';
-import { AuthService } from './AuthService';
-import { ConfigService } from './ConfigService';
+import { ServiceFactory } from './ServiceFactory';
 import { MPFFundPriceQuery, MPFFundPrice, FundPrice, MPFFund, MPFCatalog, MPFFundSummary } from '../models/MPFFundModel';
 
 export class MPFService {
 
     private static instance: MPFService;
 
-    private authService = AuthService.getInstance();
-    private configService = ConfigService.getInstance();
+    private authService = ServiceFactory.getAuthService();
+    private configService = ServiceFactory.getConfigService();
 
     private apiEndpoint = "";
     private apiKey = "";
@@ -87,8 +86,6 @@ export class MPFService {
 
     async getSummaryByFunds(funds: MPFFund[]): Promise<MPFFundSummary[]> {
 
-        console.debug("sending request ");
-
         try {
             const response: any = await this.httpPost("performance", JSON.stringify(funds));
             // console.log("getSummary() - response = " + JSON.stringify(response));
@@ -121,7 +118,7 @@ export class MPFService {
             })
             .map(catalog => catalog.fund);
 
-            console.log("getSummaryByCategories() - funds = " + JSON.stringify(funds));
+            // console.log("getSummaryByCategories() - funds = " + JSON.stringify(funds));
 
             const response: any = await this.httpPost("performance", JSON.stringify(funds));
             // console.log("getSummary() - response = " + JSON.stringify(response));
@@ -143,6 +140,7 @@ export class MPFService {
 
         try {
             const response: any = await this.httpPost("price", reqBody);
+            // console.log(JSON.stringify(response));
             return this.formatFundPriceResult(response.data);
         } catch (e) {
             console.error(e);
@@ -238,7 +236,6 @@ export class MPFService {
     async getCatalog(): Promise<MPFCatalog[]> {
 
         try {
-            console.log("getCatalog");
             const response: any = await this.httpGet("catalog");
             // console.log(JSON.stringify(response));
             let catalogList: MPFCatalog[] = response.data.map((item: any) => {

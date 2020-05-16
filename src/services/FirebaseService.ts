@@ -1,5 +1,5 @@
 import * as firebase from 'firebase/app';
-import firebaseConfig from '../firebase-api.json';
+import firebaseConfig from './firebase-api.json';
 
 export const getFirebaseInstance = () => {
 

@@ -10,10 +10,6 @@ export class ServiceFactory {
         return AuthService.getInstance();
     }
 
-    // static getMPFService() {
-    //     return 
-    // }
-
     static getConfigService() {
         return ConfigService.getInstance();
     }

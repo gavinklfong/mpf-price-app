@@ -1,5 +1,5 @@
 import React from 'react';
-import { IonButtons, IonMenuButton, IonContent, IonHeader, IonItem, IonLabel, IonList, IonPage, IonTitle, IonToolbar, IonInput, IonButton } from '@ionic/react';
+import { IonAlert, IonButtons, IonMenuButton, IonContent, IonHeader, IonItem, IonLabel, IonList, IonPage, IonTitle, IonToolbar, IonInput, IonButton } from '@ionic/react';
 import { useLogin } from '../hooks/LoginHook';
 
 import './Login.css';
@@ -33,14 +33,21 @@ const Login: React.FC = () => {
           <IonItem>
             <IonLabel>Name</IonLabel>
             <IonInput value={loginForm.loginId} name="loginId" placeholder="Login Id" onIonChange={e => handleInputChange(e)}></IonInput>
-          </IonItem>
+            </IonItem>
           <IonItem>
-            <IonLabel>Password</IonLabel>
+            <IonLabel>Password</IonLabel>         
             <IonInput type="password" name="password" value={loginForm.password} placeholder="Password" onIonChange={e => handleInputChange(e)}></IonInput>
           </IonItem>
-        </IonList>
-        <IonButton expand="block" onClick={e => submitForLogin()}>Login</IonButton>
+      </IonList>
+      <IonButton expand="block" onClick={e => submitForLogin()}>Login</IonButton>
       </IonContent>
+      <IonAlert
+          isOpen={loginForm.showAlert}
+          onDidDismiss={() => { setLoginForm((loginForm) => ({...loginForm, showAlert: false, alertMessage: ""})) }}
+          header={'Alert'}
+          message={loginForm.alertMessage}
+          buttons={['OK']}
+        />
     </IonPage>
   );
 };
