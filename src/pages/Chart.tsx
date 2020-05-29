@@ -36,7 +36,7 @@ const Chart: React.FC = () => {
       if (!!values && typeof values !== "undefined" && values.length > 0) {
 
         let selectedFundText = "Multiple Funds";
-        if (values.length == 1) {
+        if (values.length === 1) {
             selectedFundText = values[0];
         } else if (values.length > 1) {
             selectedFundText = "Multiple Funds";
@@ -74,7 +74,6 @@ const Chart: React.FC = () => {
 
       const {name, checked} = e.target
       if (checked != null && typeof checked !== "undefined") {
-         let booleanVal = Boolean(checked);
          setChartModel(chartModel => ({...chartModel, [name]: checked}));
       }   
    }
@@ -83,7 +82,7 @@ const Chart: React.FC = () => {
       console.debug(e.target.value);
       console.debug(e.target.name);
 
-      const {name, value} = e.target
+      const {value} = e.target
       if (!!value && typeof value !== "undefined" && value.length > 0) {
          setChartModel(chartModel => ({...chartModel, timePeriod: value}));
       }   

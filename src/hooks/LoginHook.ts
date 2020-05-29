@@ -1,6 +1,6 @@
 import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import { useHistory, useLocation } from "react-router-dom";
-import { useAppContext } from './ContextHook';
+import { useAppContext, LoginSessionActionType } from './ContextHook';
 import { ServiceFactory } from '../services/ServiceFactory';
 import { AuthService } from '../services/AuthService';
 import { LoginFormModel } from '../models/LoginFormModel';
@@ -9,17 +9,16 @@ export const useLogin = () : [LoginFormModel, Dispatch<SetStateAction<LoginFormM
 
     const history = useHistory();
     const location = useLocation();
-    const {loginSession, updateLoginSession} = useAppContext();
+    const {loginSession, loginSessionDispatch} = useAppContext();
     
     const authService: AuthService = ServiceFactory.getAuthService();
     
-    let initialLoginId = loginSession.loginId;
     const [loginForm, setLoginForm] = useState<LoginFormModel>({loginId: "", password: "", alertMessage: "", showAlert: false});
   
     let from: any  = location.state;
     if (from == null || from.from == null) {
       from = { from: { pathname: "/page/Summary" }  };
-    } else if (from.from.pathname == "/page/Login") {
+    } else if (from.from.pathname === "/page/Login") {
       from.from.pathname = "/page/Summary";
     }
     console.log("Login Page: from=" + JSON.stringify(from));
@@ -34,23 +33,24 @@ export const useLogin = () : [LoginFormModel, Dispatch<SetStateAction<LoginFormM
   
       history.push(from.from.pathname);
   
-    }, [loginSession.loginId]);
+    }, [loginSession.loginId, from.from.pathname, history]);
 
     const submitForLogin = async () => {
   
-      // setShowLoading(true);
-      updateLoginSession((loginSession:any) => ({...loginSession, showLoading: true}));
-  
+      loginSessionDispatch({type: LoginSessionActionType.showLoading, data: ""});
+
       try {
         let signInResult = await authService.signInWithEmailAndPassword(loginForm.loginId, loginForm.password);
         console.log(signInResult.user.email);
-        updateLoginSession((loginSession:any) => ({...loginSession, loginId: signInResult.user.email}));
+        loginSessionDispatch({type: LoginSessionActionType.setLoginId, data: signInResult.user.email});
+
       } catch (error) {
   
         setLoginForm((loginForm) => ({...loginForm, showAlert: true, alertMessage: "Incorrect login Id / password"}));
 
         await authService.signOut();
-        updateLoginSession((loginSession:any) => ({...loginSession, loginId: ""}));
+        loginSessionDispatch({type: LoginSessionActionType.setLoginId, data: ""});
+
         
         let errorCode = error.code;
         let errorMessage = error.message;
@@ -58,12 +58,8 @@ export const useLogin = () : [LoginFormModel, Dispatch<SetStateAction<LoginFormM
         console.log("auth - errorMessage = " + errorMessage);
 
 
-
-
       } finally {
-        // setShowLoading(false);
-        updateLoginSession((loginSession:any) => ({...loginSession, showLoading: false}));
-  
+        loginSessionDispatch({type: LoginSessionActionType.hideLoading, data: ""});  
       }
     }
   return [loginForm, setLoginForm, submitForLogin];

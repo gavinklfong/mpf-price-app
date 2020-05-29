@@ -1,7 +1,7 @@
 
   import React, { useEffect, useRef } from 'react';
   import Chart from 'chart.js';
-  import { ChartDataPoint, ChartDataset } from '../models/ChartDiagramModel';
+  import { ChartDataset } from '../models/ChartDiagramModel';
 
   
   export interface Props {
@@ -72,7 +72,7 @@
             };
         }
 
-    }, [props.datasets, props.labels]);
+    }, [props.datasets, props.labels, props.type]);
 
 
     return (

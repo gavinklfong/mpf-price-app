@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Dispatch } from 'react';
 
 
 export interface LoginSessionContextModel {
@@ -12,9 +12,6 @@ const INITIAL_LOGIN_SESSION_CONTEXT: LoginSessionContextModel = {
 }
 
 export const initializeLoginSessionContext = (): LoginSessionContextModel => {
-   
-    // const authService: AuthService = serviceContext.services.get("authService");
-    // let loginId = authService.getCurrentLoginId();
 
     return {
         loginId: "",
@@ -22,10 +19,9 @@ export const initializeLoginSessionContext = (): LoginSessionContextModel => {
     }
 }
 
-export const createLoginSessionContext = () => React.createContext({
+export const createLoginSessionContext = () => React.createContext<{loginSession: LoginSessionContextModel; loginSessionDispatch: Dispatch<any>}>({
     loginSession: INITIAL_LOGIN_SESSION_CONTEXT,
-    updateLoginSession: (model:LoginSessionContextModel) => {},
-    // setShowLoading: (showLoading:boolean) => {}
+    loginSessionDispatch: () => {},
 });
 
 export const LoginSessionContext = createLoginSessionContext();

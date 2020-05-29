@@ -115,6 +115,7 @@ export class MPFService {
                     if (categorySet.has(catalog.categories[i]))
                         return true;
                 }
+                return false;
             })
             .map(catalog => catalog.fund);
 
@@ -259,7 +260,7 @@ export class MPFService {
 
     private async httpGet(apiPath: string): Promise<any> {
 
-        if (this.apiEndpoint == null || this.apiEndpoint == "") {
+        if (this.apiEndpoint == null || this.apiEndpoint === "") {
             await this.initialize();
         }
 
@@ -272,7 +273,7 @@ export class MPFService {
 
     private async httpPost(apiPath: string, reqBody: string): Promise<any> {
 
-        if (this.apiEndpoint == null || this.apiEndpoint == "") {
+        if (this.apiEndpoint == null || this.apiEndpoint === "") {
             await this.initialize();
         }
 

@@ -6,12 +6,11 @@ import { LoginSessionContext } from '../AppContext';
 export const RouteWithAuth: React.FC<RouteProps> = (props)  => {
         
     const {loginSession } = useContext(LoginSessionContext);
-    const userEmail = loginSession.loginId
 
     const location = useLocation();
 
     let isAuthenticated = false;
-    if (loginSession == null || loginSession.loginId == null || loginSession.loginId.trim().length == 0) {
+    if (loginSession === null || loginSession.loginId === null || loginSession.loginId.trim().length === 0) {
         isAuthenticated = false;
     } else {
         isAuthenticated = true;

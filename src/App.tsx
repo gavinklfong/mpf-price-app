@@ -4,7 +4,7 @@ import { IonApp, IonRouterOutlet, IonSplitPane, IonLoading } from '@ionic/react'
 import { IonReactRouter } from '@ionic/react-router';
 
 import { LoginSessionContextProvider }  from './AppContext';
-import { useAppContextInitialization } from './hooks/ContextHook';
+import { useAppContextInitialization, LoginSessionActionType } from './hooks/ContextHook';
 
 import Menu from './components/Menu';
 import Summary  from './pages/Summary';
@@ -12,8 +12,6 @@ import Chart from './pages/Chart';
 import Login from './pages/Login';
 
 import RouteWithAuth from './components/RouteWithAuth';
-
-import { AuthService } from './services/AuthService';
 
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -41,9 +39,11 @@ import './theme/variables.css';
 const App: React.FC = () => {
 
   const contextInitialization = useAppContextInitialization();
+  const loginSessionDispatch = contextInitialization.loginSessionDispatch;
+  const loginSession = contextInitialization.loginSession;
   
   return (
-      <LoginSessionContextProvider value={{loginSession: contextInitialization.loginSession, updateLoginSession: contextInitialization.updateLoginSession}}>
+      <LoginSessionContextProvider value={{loginSession: loginSession, loginSessionDispatch:loginSessionDispatch}}>
       <ErrorBoundary>
       <IonApp>
         <IonReactRouter>
@@ -58,8 +58,8 @@ const App: React.FC = () => {
           </IonSplitPane>
         </IonReactRouter>
         <IonLoading
-        isOpen={contextInitialization.loginSession.showLoading}
-        onDidDismiss={() => contextInitialization.updateLoginSession({...contextInitialization.loginSession, showLoading: false})}
+        isOpen={loginSession.showLoading}
+        onDidDismiss={() => loginSessionDispatch({type: LoginSessionActionType.hideLoading, data: ""})}
         message={'Please wait...'}
       />
       </IonApp>

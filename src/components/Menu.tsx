@@ -50,7 +50,7 @@ const Menu: React.FC = () => {
   const userEmail = loginSession.loginId
 
   let isAuthenticated = false;
-  if (userEmail === null || userEmail.trim().length == 0) {
+  if (userEmail === null || userEmail.trim().length === 0) {
       isAuthenticated = false;
   } else {
       isAuthenticated = true;

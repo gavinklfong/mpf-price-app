@@ -47,6 +47,7 @@ const Login: React.FC = () => {
           header={'Alert'}
           message={loginForm.alertMessage}
           buttons={['OK']}
+          cssClass='login-alert-class'
         />
     </IonPage>
   );

@@ -6,7 +6,7 @@ import {
 import { ChartDataPoint, ChartDataset }  from '../models/ChartDiagramModel';
 import { MPFService } from '../services/MPFService';
 import { MPFFundPrice, MPFFund, FundPrice, MPFFundPriceQuery } from '../models/MPFFundModel';
-import { useAppContext } from './ContextHook';
+import { useAppContext, LoginSessionActionType } from './ContextHook';
 import { ServiceFactory } from '../services/ServiceFactory';
 import { ChartModel } from '../models/ChartModel';
 
@@ -31,7 +31,7 @@ export const useChart = () : [ChartModel, Dispatch<SetStateAction<ChartModel>>] 
         });
 
 
-    let {updateLoginSession} = useAppContext();
+    let {loginSessionDispatch} = useAppContext();
 
     const mpfService: MPFService = ServiceFactory.getMPFService();
 
@@ -43,13 +43,11 @@ export const useChart = () : [ChartModel, Dispatch<SetStateAction<ChartModel>>] 
             if (chartModel.trusteeList != null && chartModel.trusteeList.length > 0)
                 return;
 
-            // setShowLoading(true);
             const trusteeList = await mpfService.getTrustees();
 
             console.debug("retrieved trustees: " + trusteeList);
             setChartModel(chartModel => ({...chartModel, trusteeList: trusteeList})); 
-            // setShowLoading(false);   
-            updateLoginSession((loginSession:any) => ({...loginSession, showLoading: false}));
+            loginSessionDispatch({type: LoginSessionActionType.hideLoading, data: ""});
 
         }
 
@@ -107,7 +105,8 @@ export const useChart = () : [ChartModel, Dispatch<SetStateAction<ChartModel>>] 
 
         (async() => {
 
-        updateLoginSession((loginSession:any) => ({...loginSession, showLoading: true}));
+        loginSessionDispatch({type: LoginSessionActionType.showLoading, data: ""});
+
     
         console.debug("useEffect() - fundSelected() - [" + chartModel.funds + "]");
 
@@ -138,12 +137,12 @@ export const useChart = () : [ChartModel, Dispatch<SetStateAction<ChartModel>>] 
             });
 
             setChartModel(chartModel => ({...chartModel, fundPriceMap: fundPriceMap}));
-            updateLoginSession((loginSession:any) => ({...loginSession, showLoading: false}));
+            loginSessionDispatch({type: LoginSessionActionType.hideLoading, data: ""});
 
         }
         })();
 
-    }, [chartModel.funds, chartModel.timePeriod, chartModel.queryTimeRange, chartModel.scheme, chartModel.trustee, mpfService, updateLoginSession]);
+    }, [chartModel.funds, chartModel.timePeriod, chartModel.queryTimeRange, chartModel.scheme, chartModel.trustee, mpfService, loginSessionDispatch]);
 
     useEffect(() => { 
 

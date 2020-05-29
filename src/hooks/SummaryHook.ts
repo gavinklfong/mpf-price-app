@@ -2,7 +2,7 @@ import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import {
     useIonViewWillEnter,
   } from '@ionic/react';
-import { useAppContext } from './ContextHook';
+import { useAppContext, LoginSessionActionType } from './ContextHook';
 import { MPFFundSummary } from '../models/MPFFundModel';
 import { MPFService } from '../services/MPFService';
 import { Row, SummaryModel } from '../models/SummaryModel';
@@ -18,7 +18,7 @@ export const useSummary = () : [SummaryModel, Dispatch<SetStateAction<SummaryMod
     const initialSummaryPageModel = {selectedCategory: ALL_CATEGORY_ITEM, categoryList: [ALL_CATEGORY_ITEM], tableRows: []};
     const [summaryPageModel, setSummaryPageModel] = useState<SummaryModel>(initialSummaryPageModel);
 
-    const { updateLoginSession} = useAppContext();
+    const { loginSessionDispatch } = useAppContext();
 
     const mpfService: MPFService = ServiceFactory.getMPFService();
 
@@ -40,7 +40,7 @@ export const useSummary = () : [SummaryModel, Dispatch<SetStateAction<SummaryMod
 
     // temporary fix on show loading issue
     useIonViewWillEnter(() => {
-        updateLoginSession((loginSession:any) => ({...loginSession, showLoading: false}));
+        loginSessionDispatch({type: LoginSessionActionType.hideLoading, data: ""});
     });
 
     useEffect(() => {
@@ -56,7 +56,7 @@ export const useSummary = () : [SummaryModel, Dispatch<SetStateAction<SummaryMod
 
         (async () => {
 
-            updateLoginSession((loginSession:any) => ({...loginSession, showLoading: true}));
+            loginSessionDispatch({type: LoginSessionActionType.showLoading, data: ""});
             setPending(true);
             let selectedCategories = [];
             if (summaryPageModel.selectedCategory === ALL_CATEGORY_ITEM)
@@ -67,11 +67,11 @@ export const useSummary = () : [SummaryModel, Dispatch<SetStateAction<SummaryMod
             let result = await mpfService.getSummaryByCategories(selectedCategories);
             const rows = formatTableRowData(result);
             setSummaryPageModel(summaryPageModel => ({...summaryPageModel, tableRows: rows}));
-            updateLoginSession((loginSession:any) => ({...loginSession, showLoading: false}));
+            loginSessionDispatch({type: LoginSessionActionType.hideLoading, data: ""});
             setPending(false);
         })();
 
-  }, [summaryPageModel.selectedCategory, mpfService, updateLoginSession]);
+  }, [summaryPageModel.selectedCategory, mpfService, loginSessionDispatch]);
 
   return [summaryPageModel, setSummaryPageModel, pending];
 

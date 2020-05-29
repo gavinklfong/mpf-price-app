@@ -30,28 +30,28 @@ const formatCell = (value:number) => {
     }
 }
 
-const conditionalRowStyles = [
-    {
-      when: (row: Row) => (row.mth1 > 0) || (row.mth3 > 0) || (row.mth6 > 0) || (row.mth12 > 0),
-      style: {
-        backgroundColor: 'green',
-        color: 'white',
-        '&:hover': {
-          cursor: 'pointer',
-        },
-      },
-    },
-    {
-        when: (row: Row) => (row.mth1 < 0) || (row.mth3 < 0) || (row.mth6 < 0) || (row.mth12 < 0),
-        style: {
-          backgroundColor: 'red',
-          color: 'white',
-          '&:hover': {
-            cursor: 'pointer',
-          },
-        },
-      },
-  ];
+// const conditionalRowStyles = [
+//     {
+//       when: (row: Row) => (row.mth1 > 0) || (row.mth3 > 0) || (row.mth6 > 0) || (row.mth12 > 0),
+//       style: {
+//         backgroundColor: 'green',
+//         color: 'white',
+//         '&:hover': {
+//           cursor: 'pointer',
+//         },
+//       },
+//     },
+//     {
+//         when: (row: Row) => (row.mth1 < 0) || (row.mth3 < 0) || (row.mth6 < 0) || (row.mth12 < 0),
+//         style: {
+//           backgroundColor: 'red',
+//           color: 'white',
+//           '&:hover': {
+//             cursor: 'pointer',
+//           },
+//         },
+//       },
+//   ];
 
 
 const columns = [
