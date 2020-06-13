@@ -1,26 +1,20 @@
 import React, {useContext } from 'react';
 import { RouteProps } from 'react-router';
 import { useLocation, Redirect, Route } from 'react-router-dom';
-import { LoginSessionContext } from '../AppContext';
+import { observer } from 'mobx-react';
+import { AppStoreContext } from '../stores/AppStore';
 
-export const RouteWithAuth: React.FC<RouteProps> = (props)  => {
+export const RouteWithAuth: React.FC<RouteProps> = observer((props)  => {
         
-    const {loginSession } = useContext(LoginSessionContext);
+    const appStore = useContext(AppStoreContext);
 
     const location = useLocation();
 
-    let isAuthenticated = false;
-    if (loginSession === null || loginSession.loginId === null || loginSession.loginId.trim().length === 0) {
-        isAuthenticated = false;
-    } else {
-        isAuthenticated = true;
-    }
-
-    console.log("RouteWithAuth() - isAuthenticated = " + isAuthenticated + ", loginId = " + loginSession.loginId);
+    console.log("RouteWithAuth() - isAuthenticated = " + appStore.isAuthenicated() + ", loginId = " + appStore.loginId);
     console.log("RouteWithAuth() - location = " + JSON.stringify(location));
 
     return (
-        (!isAuthenticated) ? (
+        (!appStore.isAuthenicated()) ? (
             <Route path={props.path} exact={props.exact} >
                 <Redirect to={{pathname: '/page/Login', state: { from: location }}}/>
             </Route>
@@ -29,7 +23,7 @@ export const RouteWithAuth: React.FC<RouteProps> = (props)  => {
         )  
     )
 
-}
+})
 
   
 export default RouteWithAuth;

@@ -1,50 +1,17 @@
 
 import { useEffect, Dispatch, useContext, useReducer} from 'react';
-import { LoginSessionContext } from '../AppContext';
+import { autorun } from 'mobx';
 import { ServiceFactory } from '../services/ServiceFactory';
 import { AuthService } from '../services/AuthService';
 import { MPFService } from '../services/MPFService';
-import { initializeLoginSessionContext, LoginSessionContextModel } from '../AppContext';
+import { AppStoreContext } from '../stores/AppStore';
 
-
-export const useAppContext = (): any => {
-    return useContext(LoginSessionContext);
-}
-
-export enum LoginSessionActionType {
-  showLoading,
-  hideLoading,
-  setLoginId
-}
-interface LoginSessionAction {
-  type: LoginSessionActionType
-  data: string
-}
-const loginSessionReducer = (state:LoginSessionContextModel, action: LoginSessionAction) => {
-
-   const actionType = action.type;
-
-   switch (actionType) {
-     case LoginSessionActionType.showLoading:
-        return {...state, showLoading:true};
-     case LoginSessionActionType.hideLoading:
-      return {...state, showLoading:false};
-     case LoginSessionActionType.setLoginId:
-      return {...state, loginId:action.data};
-   }
-}
-
-export interface AppContextInitialization {
-  loginSession: LoginSessionContextModel;
-  loginSessionDispatch: Dispatch<LoginSessionAction>;
-}
-export const useAppContextInitialization = (): AppContextInitialization => {
-    // const [loginSession, updateLoginSession]= useState<LoginSessionContextModel>(initializeLoginSessionContext());
-    const [loginSession, loginSessionDispatch]= useReducer(loginSessionReducer, initializeLoginSessionContext());
+export const useAppContextInitialization = ()  => {
 
     const authService: AuthService = ServiceFactory.getAuthService();
     const mpfService: MPFService = ServiceFactory.getMPFService();
     
+    const appStore = useContext(AppStoreContext);
 
     useEffect(() => {
 
@@ -52,22 +19,22 @@ export const useAppContextInitialization = (): AppContextInitialization => {
 
         console.log("onAuthStateChange() - user = " + JSON.stringify(user));
 
-        if (user != null && user.email != null)
-            loginSessionDispatch({type: LoginSessionActionType.setLoginId, data: user.email});
-            // updateLoginSession((loginSession:any) => ({...loginSession, loginId: user.email}));
+        if (user != null && user.email != null) {
+            appStore.setLoginId(user.email);
+        }
       });
   
     }, [authService]);
 
-    useEffect(() => {
-  
-        if (loginSession.loginId != null && loginSession.loginId.length > 0) {
-          mpfService.initialize(true);
-        }
+    useEffect(
+      () =>
+        autorun(() => {
+          console.log("useEffect - autorun - appStore.loginId = " + appStore.loginId);
+          if (appStore.loginId != null && appStore.loginId === "") {
+            mpfService.initialize(true);
+          }
+        }),
+      [], // note empty dependencies
+    )
 
-    
-      }, [loginSession.loginId, mpfService]);
-
-
-    return {loginSession, loginSessionDispatch};
 } 

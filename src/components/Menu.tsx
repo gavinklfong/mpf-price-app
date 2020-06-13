@@ -8,13 +8,15 @@ import {
   IonMenuToggle,
 } from '@ionic/react';
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { useLocation } from 'react-router-dom';
-import { barChartOutline, barChartSharp, newspaperOutline, newspaperSharp} from 'ionicons/icons';
+import { barChartOutline, barChartSharp, newspaperOutline, newspaperSharp, baseballOutline, baseballSharp} from 'ionicons/icons';
 import './Menu.css';
 
 import MenuLoginId from './MenuLoginId';
-import { useAppContext} from '../hooks/ContextHook';
+import { observer } from 'mobx-react';
+import { AppStoreContext } from '../stores/AppStore';
+
 
 
 interface AppPage {
@@ -39,32 +41,33 @@ const appPages: AppPage[] = [
     iosIcon: barChartOutline,
     mdIcon: barChartSharp,
     needAuthentication: true
+  },
+  {
+    title: 'Investment',
+    url: '/page/Investment',
+    iosIcon: baseballOutline,
+    mdIcon: baseballSharp,
+    needAuthentication: true
   }
 ];
 
-const Menu: React.FC = () => {
+const Menu: React.FC = observer(() => {
 
   const location = useLocation();
 
-  const {loginSession} = useAppContext();
-  const userEmail = loginSession.loginId
+  const appStore = useContext(AppStoreContext);
 
-  let isAuthenticated = false;
-  if (userEmail === null || userEmail.trim().length === 0) {
-      isAuthenticated = false;
-  } else {
-      isAuthenticated = true;
-  }
+  const userEmail = appStore.loginId;
 
-  console.log("Menu: isAuthenticated = " + isAuthenticated + ", userEmail = " + userEmail);
+  console.log("Menu: isAuthenticated = " + appStore.isAuthenicated() + ", userEmail = " + userEmail);
  
   return (
     <IonMenu contentId="main" type="overlay">
       <IonContent>
         <IonList id="inbox-list">
-          <MenuLoginId loginId={userEmail} isAuthenticated={isAuthenticated} />
+          <MenuLoginId loginId={userEmail} isAuthenticated={appStore.isAuthenicated()} />
           {appPages
-          .filter(appPage => ((!appPage.needAuthentication) || (appPage.needAuthentication && isAuthenticated)))
+          .filter(appPage => ((!appPage.needAuthentication) || (appPage.needAuthentication && appStore.isAuthenicated())))
           .map((appPage, index) => {
             return (
               <IonMenuToggle key={index} autoHide={false}>
@@ -79,6 +82,6 @@ const Menu: React.FC = () => {
       </IonContent>
     </IonMenu>
   );
-};
+});
 
 export default Menu;

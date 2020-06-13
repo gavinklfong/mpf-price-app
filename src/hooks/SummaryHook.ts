@@ -1,8 +1,8 @@
-import { useState, useEffect, Dispatch, SetStateAction } from 'react';
+import { useState, useEffect, Dispatch, SetStateAction, useContext } from 'react';
 import {
     useIonViewWillEnter,
   } from '@ionic/react';
-import { useAppContext, LoginSessionActionType } from './ContextHook';
+import { UIStateStoreContext } from '../stores/UIStateStore';
 import { MPFFundSummary } from '../models/MPFFundModel';
 import { MPFService } from '../services/MPFService';
 import { Row, SummaryModel } from '../models/SummaryModel';
@@ -13,12 +13,14 @@ export const ALL_CATEGORY_ITEM = "-- All Categories --";
 
 export const useSummary = () : [SummaryModel, Dispatch<SetStateAction<SummaryModel>>, boolean] => {
 
+    const uiStateStore = useContext(UIStateStoreContext);
+
     const [pending, setPending] = useState(true);
 
     const initialSummaryPageModel = {selectedCategory: ALL_CATEGORY_ITEM, categoryList: [ALL_CATEGORY_ITEM], tableRows: []};
     const [summaryPageModel, setSummaryPageModel] = useState<SummaryModel>(initialSummaryPageModel);
 
-    const { loginSessionDispatch } = useAppContext();
+    // const { loginSessionDispatch } = useAppContext();
 
     const mpfService: MPFService = ServiceFactory.getMPFService();
 
@@ -40,7 +42,8 @@ export const useSummary = () : [SummaryModel, Dispatch<SetStateAction<SummaryMod
 
     // temporary fix on show loading issue
     useIonViewWillEnter(() => {
-        loginSessionDispatch({type: LoginSessionActionType.hideLoading, data: ""});
+        // loginSessionDispatch({type: LoginSessionActionType.hideLoading, data: ""});
+        uiStateStore.setShowLoading(false);
     });
 
     useEffect(() => {
@@ -56,7 +59,9 @@ export const useSummary = () : [SummaryModel, Dispatch<SetStateAction<SummaryMod
 
         (async () => {
 
-            loginSessionDispatch({type: LoginSessionActionType.showLoading, data: ""});
+            // loginSessionDispatch({type: LoginSessionActionType.showLoading, data: ""});
+            uiStateStore.setShowLoading(true);
+
             setPending(true);
             let selectedCategories = [];
             if (summaryPageModel.selectedCategory === ALL_CATEGORY_ITEM)
@@ -67,11 +72,14 @@ export const useSummary = () : [SummaryModel, Dispatch<SetStateAction<SummaryMod
             let result = await mpfService.getSummaryByCategories(selectedCategories);
             const rows = formatTableRowData(result);
             setSummaryPageModel(summaryPageModel => ({...summaryPageModel, tableRows: rows}));
-            loginSessionDispatch({type: LoginSessionActionType.hideLoading, data: ""});
+            uiStateStore.setShowLoading(false);
+
+            // loginSessionDispatch({type: LoginSessionActionType.hideLoading, data: ""});
+            
             setPending(false);
         })();
 
-  }, [summaryPageModel.selectedCategory, mpfService, loginSessionDispatch]);
+  }, [summaryPageModel.selectedCategory, mpfService]);
 
   return [summaryPageModel, setSummaryPageModel, pending];
 

@@ -1,10 +1,11 @@
 import React from 'react';
+import { observer } from 'mobx-react';
 import { IonAlert, IonButtons, IonMenuButton, IonContent, IonHeader, IonItem, IonLabel, IonList, IonPage, IonTitle, IonToolbar, IonInput, IonButton } from '@ionic/react';
 import { useLogin } from '../hooks/LoginHook';
 
 import './Login.css';
 
-const Login: React.FC = () => {
+const Login: React.FC = observer(() => {
 
   const [loginForm, setLoginForm, submitForLogin] = useLogin();
 
@@ -51,6 +52,6 @@ const Login: React.FC = () => {
         />
     </IonPage>
   );
-};
+});
 
 export default Login;

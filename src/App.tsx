@@ -1,15 +1,16 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { observer } from 'mobx-react';
 import { Redirect, Route } from 'react-router-dom';
 import { IonApp, IonRouterOutlet, IonSplitPane, IonLoading } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-
-import { LoginSessionContextProvider }  from './AppContext';
-import { useAppContextInitialization, LoginSessionActionType } from './hooks/ContextHook';
-
+import { useAppContextInitialization } from './hooks/ContextHook';
 import Menu from './components/Menu';
 import Summary  from './pages/Summary';
 import Chart from './pages/Chart';
 import Login from './pages/Login';
+import Investment from './pages/Investment';
+
+import { UIStateStoreContext } from './stores/UIStateStore';
 
 import RouteWithAuth from './components/RouteWithAuth';
 
@@ -36,14 +37,14 @@ import '@ionic/react/css/display.css';
 import './theme/variables.css';
 
 
-const App: React.FC = () => {
+const App: React.FC = observer( () => {
 
-  const contextInitialization = useAppContextInitialization();
-  const loginSessionDispatch = contextInitialization.loginSessionDispatch;
-  const loginSession = contextInitialization.loginSession;
+  const uiStateStore = useContext(UIStateStoreContext);
+
+  useAppContextInitialization();
+
   
   return (
-      <LoginSessionContextProvider value={{loginSession: loginSession, loginSessionDispatch:loginSessionDispatch}}>
       <ErrorBoundary>
       <IonApp>
         <IonReactRouter>
@@ -52,20 +53,20 @@ const App: React.FC = () => {
             <IonRouterOutlet id="main">
               <RouteWithAuth path="/page/Summary" exact component={Summary} />
               <RouteWithAuth  path="/page/Chart" exact component={Chart} />
-              <Route path="/page/Login" component={Login} exact />
+              <RouteWithAuth path="/page/Investment" exact component={Investment} />
+              <Route path="/page/Login" exact component={Login} />
               <Redirect from="/" to="/page/Summary" exact />
             </IonRouterOutlet>
           </IonSplitPane>
         </IonReactRouter>
         <IonLoading
-        isOpen={loginSession.showLoading}
-        onDidDismiss={() => loginSessionDispatch({type: LoginSessionActionType.hideLoading, data: ""})}
+        isOpen={uiStateStore.showLoading}
+        onDidDismiss={() => uiStateStore.setShowLoading(false)}
         message={'Please wait...'}
       />
       </IonApp>
       </ErrorBoundary>
-      </LoginSessionContextProvider>
   );
-};
+});
 
 export default App;

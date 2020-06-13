@@ -1,12 +1,12 @@
 import moment from 'moment';
-import { useState, useEffect, Dispatch, SetStateAction } from 'react';
+import { useState, useEffect, Dispatch, SetStateAction, useContext } from 'react';
 import {
     useIonViewWillEnter,
   } from '@ionic/react';
+import { UIStateStoreContext } from '../stores/UIStateStore';
 import { ChartDataPoint, ChartDataset }  from '../models/ChartDiagramModel';
 import { MPFService } from '../services/MPFService';
 import { MPFFundPrice, MPFFund, FundPrice, MPFFundPriceQuery } from '../models/MPFFundModel';
-import { useAppContext, LoginSessionActionType } from './ContextHook';
 import { ServiceFactory } from '../services/ServiceFactory';
 import { ChartModel } from '../models/ChartModel';
 
@@ -21,6 +21,8 @@ const arrayHasValue = (value: Array<any> | undefined): boolean => (!!value && ty
 
 export const useChart = () : [ChartModel, Dispatch<SetStateAction<ChartModel>>] => {
 
+    const uiStateStore = useContext(UIStateStoreContext);
+
     const [chartModel, setChartModel] = useState<ChartModel>(
         {
            trustee: "", scheme: "", selectedFundText: "", 
@@ -31,10 +33,7 @@ export const useChart = () : [ChartModel, Dispatch<SetStateAction<ChartModel>>] 
         });
 
 
-    let {loginSessionDispatch} = useAppContext();
-
     const mpfService: MPFService = ServiceFactory.getMPFService();
-
 
     useIonViewWillEnter(async () => {
         console.log('useChart() ionViewWillEnter event fired');
@@ -46,8 +45,13 @@ export const useChart = () : [ChartModel, Dispatch<SetStateAction<ChartModel>>] 
             const trusteeList = await mpfService.getTrustees();
 
             console.debug("retrieved trustees: " + trusteeList);
-            setChartModel(chartModel => ({...chartModel, trusteeList: trusteeList})); 
-            loginSessionDispatch({type: LoginSessionActionType.hideLoading, data: ""});
+
+            if (chartModel.trustee === null || chartModel.trustee === "") {
+                setChartModel(chartModel => ({...chartModel, trustee: trusteeList[0], trusteeList: trusteeList}));                 
+            } else {
+                setChartModel(chartModel => ({...chartModel, trusteeList: trusteeList})); 
+                uiStateStore.setShowLoading(false);
+            }
 
         }
 
@@ -105,14 +109,12 @@ export const useChart = () : [ChartModel, Dispatch<SetStateAction<ChartModel>>] 
 
         (async() => {
 
-        loginSessionDispatch({type: LoginSessionActionType.showLoading, data: ""});
-
+        uiStateStore.setShowLoading(true);
     
         console.debug("useEffect() - fundSelected() - [" + chartModel.funds + "]");
 
         if (chartModel.funds && chartModel.funds.length > 0) {
     
-            // setShowLoading(true);
             console.debug("fetching fund prices");
 
             let queryFunds = new Array<MPFFund>();
@@ -132,17 +134,16 @@ export const useChart = () : [ChartModel, Dispatch<SetStateAction<ChartModel>>] 
             let retrievedFundPrices = await mpfService.getFundPrices(fundPriceQuery);
 
             retrievedFundPrices.forEach(item => {
-                // console.debug("retrieved fund price item: " + JSON.stringify(item));
                 fundPriceMap.set({trustee: item.trustee, scheme: item.scheme, fund: item.fund}, item);
             });
 
             setChartModel(chartModel => ({...chartModel, fundPriceMap: fundPriceMap}));
-            loginSessionDispatch({type: LoginSessionActionType.hideLoading, data: ""});
+            uiStateStore.setShowLoading(false);
 
         }
         })();
 
-    }, [chartModel.funds, chartModel.timePeriod, chartModel.queryTimeRange, chartModel.scheme, chartModel.trustee, mpfService, loginSessionDispatch]);
+    }, [chartModel.funds, chartModel.timePeriod, chartModel.queryTimeRange, chartModel.scheme, chartModel.trustee, mpfService]);
 
     useEffect(() => { 
 

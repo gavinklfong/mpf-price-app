@@ -1,6 +1,8 @@
-import { useState, useEffect, Dispatch, SetStateAction } from 'react';
+import { useState, useEffect, Dispatch, SetStateAction, useContext } from 'react';
+import { autorun } from 'mobx';
 import { useHistory, useLocation } from "react-router-dom";
-import { useAppContext, LoginSessionActionType } from './ContextHook';
+import { AppStoreContext } from '../stores/AppStore';
+import { UIStateStoreContext } from '../stores/UIStateStore';
 import { ServiceFactory } from '../services/ServiceFactory';
 import { AuthService } from '../services/AuthService';
 import { LoginFormModel } from '../models/LoginFormModel';
@@ -9,12 +11,14 @@ export const useLogin = () : [LoginFormModel, Dispatch<SetStateAction<LoginFormM
 
     const history = useHistory();
     const location = useLocation();
-    const {loginSession, loginSessionDispatch} = useAppContext();
     
     const authService: AuthService = ServiceFactory.getAuthService();
     
     const [loginForm, setLoginForm] = useState<LoginFormModel>({loginId: "", password: "", alertMessage: "", showAlert: false});
   
+    const uiStateStore = useContext(UIStateStoreContext);
+    const appStore = useContext(AppStoreContext);
+
     let from: any  = location.state;
     if (from == null || from.from == null) {
       from = { from: { pathname: "/page/Summary" }  };
@@ -23,34 +27,34 @@ export const useLogin = () : [LoginFormModel, Dispatch<SetStateAction<LoginFormM
     }
     console.log("Login Page: from=" + JSON.stringify(from));
   
-  
-    useEffect(() => {
-  
-      console.log("Login - useEffect() - loginSession.loginId = " + loginSession.loginId + ", from = " + from.from.pathname);
-  
-      if (loginSession.loginId == null || loginSession.loginId === "")
-        return;
-  
-      history.push(from.from.pathname);
-  
-    }, [loginSession.loginId, from.from.pathname, history]);
+    useEffect(
+      () =>
+        autorun(() => {
+          console.log("useEffect - autorun - appStore.loginId = " + appStore.loginId);
+          if (appStore.loginId == null || appStore.loginId === "")
+            return;
+    
+          history.push(from.from.pathname);
+        }),
+      [], // note empty dependencies
+    )
 
     const submitForLogin = async () => {
   
-      loginSessionDispatch({type: LoginSessionActionType.showLoading, data: ""});
+      uiStateStore.setShowLoading(true);
 
       try {
         let signInResult = await authService.signInWithEmailAndPassword(loginForm.loginId, loginForm.password);
         console.log(signInResult.user.email);
-        loginSessionDispatch({type: LoginSessionActionType.setLoginId, data: signInResult.user.email});
+        console.log("appStore.setLoginId()");
+        appStore.setLoginId(signInResult.user.email);
 
       } catch (error) {
   
         setLoginForm((loginForm) => ({...loginForm, showAlert: true, alertMessage: "Incorrect login Id / password"}));
 
         await authService.signOut();
-        loginSessionDispatch({type: LoginSessionActionType.setLoginId, data: ""});
-
+        appStore.setLoginId("");
         
         let errorCode = error.code;
         let errorMessage = error.message;
@@ -59,7 +63,7 @@ export const useLogin = () : [LoginFormModel, Dispatch<SetStateAction<LoginFormM
 
 
       } finally {
-        loginSessionDispatch({type: LoginSessionActionType.hideLoading, data: ""});  
+        uiStateStore.setShowLoading(false);
       }
     }
   return [loginForm, setLoginForm, submitForLogin];

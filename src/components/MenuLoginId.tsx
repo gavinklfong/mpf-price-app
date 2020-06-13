@@ -4,11 +4,11 @@ import {
   IonAlert
 } from '@ionic/react';
 
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import Avatar from 'react-avatar';
+import { AppStoreContext } from '../stores/AppStore';
 import './MenuLoginId.css';
 
-import { useAppContext, LoginSessionActionType } from '../hooks/ContextHook';
 import { AuthService } from '../services/AuthService';
 import { ServiceFactory } from '../services/ServiceFactory';
 
@@ -20,11 +20,12 @@ export interface LoginIdProps {
 const MenuLoginId: React.FC<LoginIdProps> = (props) => {
   const [showAlert, setShowAlert] = useState(false);
   const authService: AuthService = ServiceFactory.getAuthService();
-  const { loginSessionDispatch } = useAppContext();
+
+  const appStore = useContext(AppStoreContext);
 
   const signout = async () => {
     await authService.signOut();
-    loginSessionDispatch({type: LoginSessionActionType.setLoginId, data: ""});
+    appStore.resetLoginId();
   }
 
   return (
@@ -37,7 +38,7 @@ const MenuLoginId: React.FC<LoginIdProps> = (props) => {
           cssClass="signout-alert"
           isOpen={showAlert}
           onDidDismiss={() => setShowAlert(false)}
-          message={"Signout?"}
+          message={"Sign out?"}
           buttons={[
             {text: 'OK', role: 'OK',
              handler: () => signout()   
